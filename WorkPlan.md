@@ -27,7 +27,7 @@
             3. Calculating the number of pull requests said user has reviewed (code reviews have higher contribution in activeness factor compared to commits/pull requests)
             4. Analysing the PR comments made by user (Optional: can be used as a factor in calculating activeness factor)
 
-    2. For each repo a user has contributed to, calculate a repo score that rates how active that repo is (for this we can use exiting tools, like ____________). This repo score, along with users activeness factor in that repo are used together to calculate a total user score which rates how active/experienced etc a user is. 
+    2. For each repo a user has contributed to, calculate a repo score that rates how active that repo is (for this we can use exiting tools, like gitstats, gitinspector and gitcompare). This repo score, along with users activeness factor in that repo are used together to calculate a total user score which rates how active/experienced etc a user is. 
 
     3. An average of said user score for our chosen repo, along with a detailed breakdown of data can help a user better analyse the level of users contributing to a repo, and thus decide whether its beginner friendly/ alignes with thier skills / has higher chance for them to be able to contribute.
 
