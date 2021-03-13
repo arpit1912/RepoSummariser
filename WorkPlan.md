@@ -38,3 +38,6 @@
     2. any repo with open source mentioned in project description
     3. any repo with more than 10 contributors
             
+## Current Plan Update
+1. Create a main class RepoSummarise which deals with all the data requests
+    1. Each Function writes the data in a File so that it can be read at any other time and will be preserved
