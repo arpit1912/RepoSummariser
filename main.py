@@ -1,7 +1,6 @@
 # Importing the Libraries
 from github import Github
 import requests
-import os
 import json
 from pprint import pprint
 
@@ -24,6 +23,7 @@ class RepoSummariser:
         headers = {'Authorization': f'token {self.token}'}
         r = requests.get(query_url, headers=headers, params=params)
         data = r.json()
+        print(data)
         count = 2
 
         while(len(r.json())!=0):
@@ -53,15 +53,13 @@ class RepoSummariser:
         with open(f"data/{self.repo}_all_users.json","w") as outfile:
             json.dump(data,outfile)
     
-    // work need to be done
     def get_all_user_repos(self):
         
         user_names = []
         with open(f"data/{self.repo}_all_users.json",) as inpFile:
             user_names = json.load(inpFile)['users']
         user_names = user_names[:10]
-        data = []
-        unfiltered_repo_list = []
+        data = {}
         for username in user_names:
             print(username)
             query_url = f"https://api.github.com/users/{username}/repos"
@@ -71,17 +69,80 @@ class RepoSummariser:
                     }
             headers = {'Authorization': f'token {self.token}'}
             r = requests.get(query_url, headers=headers, params=params)
-            unfiltered_repo_list.append(r.json())
-            data.append({f"{username}":r.json})
+            data[f"{username}"] = r.json()
         print(data)
         with open(f"data/{self.repo}_all_users_repo.json","w") as outfile:
             json.dump(data,outfile)
     
+    def repo_details(self,owner,repo):
+        query_url = f"https://api.github.com/repos/{owner}/{repo}"
+        params = {
+            "state": "open",
+        }
+        headers = {'Authorization': f'token {self.token}'}
+        r = requests.get(query_url, headers=headers, params=params)
+        return r.json()            
     
-
-classObject = RepoSummariser("47623b5391cd52f3289b24cbfdfbf19c61092ea0")
-classObject.initialise_repo("oppia","oppia")
+    def calculated_contribution(self,owner,main_repo):
+        
+        contributor_list = []
+        with open(f"data/{main_repo}_contributors.json",) as inpFile:
+            contributor_list = json.load(inpFile)
+            
+        total_contributions = 0
+        user_contribution = 0
+        for contributor in contributor_list:
+            if(contributor['contributions'] > 0):
+                total_contributions += contributor['contributions']
+                if(contributor['login'] == owner):
+                    print(contributor['login'], " this is the match we found")
+                    user_contribution = contributor['contributions']
+            
+        
+        return total_contributions, user_contribution
+    
+    def filter_valid_repos(self):
+        
+        user_repos = []
+        with open(f"data/{self.repo}_all_users_repo.json",) as inpFile:
+            user_repos = json.load(inpFile)
+        
+        data = {}
+        for user,repos in user_repos.items():
+            temp_repo_list = []
+            for repo in repos:
+                
+                if repo['fork'] is True:
+                    # if the repo is forked from somewhere else
+                    owner,reponame = repo['full_name'].split("/")
+                    original_repo_data = self.repo_details(owner,reponame)
+                    # find the complete detail of the Repo
+                    
+                    if original_repo_data.get('source') !=None: # this field stores the original repo holder
+                        main_owner,main_repo = original_repo_data['source']['full_name'].split("/") # find the owner and name 
+                        
+                        temp_owner,temp_repo = self.owner, self.repo
+                        self.initialise_repo(main_owner,main_repo)
+                        self.get_contributors_list()
+                        self.initialise_repo(temp_owner,temp_repo)
+                        
+                        total_contri,user_contri = self.calculated_contribution(owner,main_repo)
+                        
+                        print(total_contri," THis is the ontri ",user_contri, " for the user ", user)
+                        
+                        if(user_contri > 0):
+                            temp_repo_list.append(repo)    
+                            print(total_contri, user_contri)
+                    
+            data[f"{user}"] = temp_repo_list
+         
+        with open(f"data/{self.repo}_all_users_filtered_repo.json","w") as outfile:
+            json.dump(data,outfile)   
+        
+                            
+classObject = RepoSummariser("<use-token-here")
+classObject.initialise_repo("arpit1912","SE-gamedev")
 #classObject.get_contributors_list()
-
-#classObject.get_contributor_login()        
-classObject.get_all_user_repos()
+#lassObject.get_contributor_login()        
+#classObject.get_all_user_repos()
+classObject.filter_valid_repos()
