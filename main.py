@@ -131,18 +131,39 @@ class RepoSummariser:
                         print(total_contri," THis is the ontri ",user_contri, " for the user ", user)
                         
                         if(user_contri > 0):
-                            temp_repo_list.append(repo)    
+                            temp_repo_list.append(original_repo_data['source'])    
                             print(total_contri, user_contri)
                     
             data[f"{user}"] = temp_repo_list
          
         with open(f"data/{self.repo}_all_users_filtered_repo.json","w") as outfile:
             json.dump(data,outfile)   
+    
+    def RepoExploration(self):
+        repos = []
+        with open(f"data/{self.repo}_all_users_filtered_repo.json",) as inpFile:
+            repos = json.load(inpFile)
         
-                            
-classObject = RepoSummariser("<use-token-here")
+        for user,repo_data in repos.items():
+            owner, repo = repo_data[0]['full_name'].split("/") # find the owner and name 
+            query_url = f"https://api.github.com/repos/{repo}/{owner}/pulls/"
+            print(query_url)
+            params = {
+            "author": user,
+            }
+            headers = {'Authorization': f'token {self.token}'}
+            r = requests.get(query_url, headers=headers)
+
+            print(r.json())
+            #print(repo)
+            break
+        
+        #pprint(repos)
+                 
+classObject = RepoSummariser("token")
 classObject.initialise_repo("arpit1912","SE-gamedev")
 #classObject.get_contributors_list()
 #lassObject.get_contributor_login()        
 #classObject.get_all_user_repos()
-classObject.filter_valid_repos()
+#classObject.filter_valid_repos()
+classObject.RepoExploration()
