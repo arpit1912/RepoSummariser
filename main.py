@@ -228,21 +228,24 @@ class RepoSummariser:
                     print(query_url)
                     r = requests.get(query_url, headers=headers, params=params)
                     temp = r.json()
-                    #print("soomgortm",temp["files"])
-                    total_add += temp["stats"]["additions"]
-                    total_del += temp["stats"]["deletions"]
-                    #temp_message = temp["message"]
-                    message.append(temp["commit"]["message"])
-                    files = temp["files"]
-                    for file in files:
-                        temp_file = {}
-                        for key,val in file.items():
-                            if key == "filename" or key == "status" or key == "additions" or key == "deletions" or key == "patch":
-                                temp_file[key] = val
-                        #print(temp_file)
-                        temp_file["message"] = message
-                        total_files.append(temp_file)
-                        #print(total_files)
+                    
+                    #adding a basic check to remove asset files like images
+                    @arpit1912 check if below condition works
+                    if (temp["stats"]["additions"] != 0 and temp["stats"]["deletions"] != 0) : 
+                        total_add += temp["stats"]["additions"]
+                        total_del += temp["stats"]["deletions"]
+                        #temp_message = temp["message"]
+                        message.append(temp["commit"]["message"])
+                        files = temp["files"]
+                        for file in files:
+                            temp_file = {}
+                            for key,val in file.items():
+                                if key == "filename" or key == "status" or key == "additions" or key == "deletions" or key == "patch":
+                                    temp_file[key] = val
+                            #print(temp_file)
+                            temp_file["message"] = message
+                            total_files.append(temp_file)
+                            #print(total_files)
                         
                     #print (sha)
                 repo_data[repo_name] = {"additions": total_add,"deletions": total_del,"files":total_files}
