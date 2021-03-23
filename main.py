@@ -211,6 +211,7 @@ class RepoSummariser:
             
                 total_add = 0
                 total_del = 0
+                
                 total_files = []
                 
                 owner = repo_name.split("_")[0]
@@ -218,7 +219,7 @@ class RepoSummariser:
                 print(owner,repo)
                 
                 for sha in shas:
-                    
+                    message = []
                     query_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
                     params = {
                             "state": "open",
@@ -230,13 +231,16 @@ class RepoSummariser:
                     #print("soomgortm",temp["files"])
                     total_add += temp["stats"]["additions"]
                     total_del += temp["stats"]["deletions"]
+                    #temp_message = temp["message"]
+                    message.append(temp["commit"]["message"])
                     files = temp["files"]
                     for file in files:
                         temp_file = {}
                         for key,val in file.items():
-                            if key == "filename" or key == "status" or key == "additions" or key == "deletions":
+                            if key == "filename" or key == "status" or key == "additions" or key == "deletions" or key == "patch":
                                 temp_file[key] = val
                         #print(temp_file)
+                        temp_file["message"] = message
                         total_files.append(temp_file)
                         #print(total_files)
                         
@@ -255,7 +259,7 @@ class RepoSummariser:
         pprint(r.json())
         #pprint(repos)
                  
-classObject = RepoSummariser("<token>")
+classObject = RepoSummariser("64549044554cf80b6a794f7a3642cfc8d218ae17")
 classObject.initialise_repo("arpit1912","SE-gamedev")
 #classObject.get_contributors_list()
 #lassObject.get_contributor_login()        
