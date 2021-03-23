@@ -2,6 +2,8 @@
 from github import Github
 import requests
 import json
+import mimetypes
+import re
 from pprint import pprint
 
 class RepoSummariser:
@@ -229,8 +231,7 @@ class RepoSummariser:
                     r = requests.get(query_url, headers=headers, params=params)
                     temp = r.json()
                     
-                    #adding a basic check to remove asset files like images
-                    @arpit1912 check if below condition works
+                    
                     if (temp["stats"]["additions"] != 0 and temp["stats"]["deletions"] != 0) : 
                         total_add += temp["stats"]["additions"]
                         total_del += temp["stats"]["deletions"]
@@ -239,15 +240,25 @@ class RepoSummariser:
                         files = temp["files"]
                         for file in files:
                             temp_file = {}
+                            eligible = True
+                            file_type = ""
                             for key,val in file.items():
+                                if key == "filename":
+                                    file_type = mimetypes.guess_type(val)[0]
+                                    if file_type == None:
+                                        file_type = "none"
+                                    
+                                    matchType = re.match( r'(image|video|audio).*', file_type, re.M|re.I)
+                                    if matchType:
+                                        eligible = False
+                                    else:
+                                        temp_file["type"] = file_type
                                 if key == "filename" or key == "status" or key == "additions" or key == "deletions" or key == "patch":
                                     temp_file[key] = val
-                            #print(temp_file)
                             temp_file["message"] = message
-                            total_files.append(temp_file)
-                            #print(total_files)
-                        
-                    #print (sha)
+                            if eligible is True:
+                                total_files.append(temp_file)
+                            
                 repo_data[repo_name] = {"additions": total_add,"deletions": total_del,"files":total_files}
             user_data[user] = repo_data
         
@@ -262,7 +273,7 @@ class RepoSummariser:
         pprint(r.json())
         #pprint(repos)
                  
-classObject = RepoSummariser("64549044554cf80b6a794f7a3642cfc8d218ae17")
+classObject = RepoSummariser("1af66bfc5be1e19eeaf709edfe877850d49c3ff2")
 classObject.initialise_repo("arpit1912","SE-gamedev")
 #classObject.get_contributors_list()
 #lassObject.get_contributor_login()        
