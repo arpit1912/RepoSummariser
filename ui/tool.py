@@ -98,6 +98,9 @@ class RepoSummariser:
         }
         headers = {'Authorization': f'token {self.token}'}
         r = requests.get(query_url, headers=headers, params=params)
+        #pprint(r.json())
+        with open(f"data/temp_data.json","w") as outfile:
+            json.dump(r.json(),outfile,indent=4)
         
         return r.json()            
     
@@ -317,19 +320,63 @@ class RepoSummariser:
         self.filtered_commits()
         self.commit_sha_exploration()
         print( "Ending the Data Extraction Process")
-
-
-if __name__ == "__main__":
-    classObject = RepoSummariser("9ab3c7cf2a89afde31a4a30dec51c7bbaf2de1f8")
-    classObject.rate_check()
     
+    def Repo_Details(self):
+        
+        query_url = f"https://api.github.com/users/sam3926"
+        print(query_url)
+        header = {'Authorization': f'token {self.token}'}
+        r = requests.get(query_url,headers = header)
+        pprint(r.json())
+
+    def graph_intro(self):
+        headers = {'Authorization': f'token {self.token}'}
+        query = """
+        {
+          
+            name
+            kind
+            description
+            fields {
+              name
+            }
+          
+        }
+        """
+
+        request = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
+        #print(request.json())
+        with open(f"data/temp_graph_inspect_data.json","w") as outfile:
+            json.dump(request.json(),outfile,indent=4)
+        
+    def repo_graph_details(self):
+        
+        headers = {'Authorization': f'token {self.token}'}
+        query = """
+        {
+          repository(owner: "oppia", name: "oppia") {
+            repositoryTopics(first: 10) {
+              edges {
+                node {
+                  topic {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+        """
+
+        request = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
+        #print(request.json())
+        with open(f"data/temp_graph_data.json","w") as outfile:
+            json.dump(request.json(),outfile,indent=4)
+            
+if __name__ == "__main__":
+    classObject = RepoSummariser("<token>")
+    classObject.rate_check()
     classObject.initialise_repo("arpit1912","SE-gamedev")
-    # classObject.get_contributors_list()
-    # classObject.get_contributor_login()        
-    # classObject.get_all_user_repos()
-    # classObject.filter_valid_repos()
-    # classObject.RepoExploration()
-    # classObject.filtered_commits()
-    # classObject.rate_check()
-    # classObject.commit_sha_exploration()
-    classObject.start_processing()
+    #classObject.start_processing()
+    classObject.graph_intro()
+    #classObject.Repo_Details()

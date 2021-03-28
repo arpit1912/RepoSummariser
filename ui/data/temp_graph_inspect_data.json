@@ -1,0 +1,76 @@
+{
+    "errors": [
+        {
+            "path": [
+                "query",
+                "name"
+            ],
+            "extensions": {
+                "code": "undefinedField",
+                "typeName": "Query",
+                "fieldName": "name"
+            },
+            "locations": [
+                {
+                    "line": 4,
+                    "column": 13
+                }
+            ],
+            "message": "Field 'name' doesn't exist on type 'Query'"
+        },
+        {
+            "path": [
+                "query",
+                "kind"
+            ],
+            "extensions": {
+                "code": "undefinedField",
+                "typeName": "Query",
+                "fieldName": "kind"
+            },
+            "locations": [
+                {
+                    "line": 5,
+                    "column": 13
+                }
+            ],
+            "message": "Field 'kind' doesn't exist on type 'Query'"
+        },
+        {
+            "path": [
+                "query",
+                "description"
+            ],
+            "extensions": {
+                "code": "undefinedField",
+                "typeName": "Query",
+                "fieldName": "description"
+            },
+            "locations": [
+                {
+                    "line": 6,
+                    "column": 13
+                }
+            ],
+            "message": "Field 'description' doesn't exist on type 'Query'"
+        },
+        {
+            "path": [
+                "query",
+                "fields"
+            ],
+            "extensions": {
+                "code": "undefinedField",
+                "typeName": "Query",
+                "fieldName": "fields"
+            },
+            "locations": [
+                {
+                    "line": 7,
+                    "column": 13
+                }
+            ],
+            "message": "Field 'fields' doesn't exist on type 'Query'"
+        }
+    ]
+}
