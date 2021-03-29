@@ -39,7 +39,36 @@ repo data to be pulled
         }
         headers = {'Authorization': f'token {self.token}'}
         r = requests.get(query_url, headers=headers, params=params)
-    '''
+
+
+
+users contributions by date : 
+NOTE : to get all contributions, remove the parenthesis and parameters after contributionsCollection.
+Specify correct date range to get data : YYYY-MM-DD ; Also, to and from date range cannot exceed one year
+
+
+        headers = {'Authorization': f'token {token}'}
+        query = """
+        {
+        user(login: "sam3926") {
+            contributionsCollection (from: "2020-01-01T00:00:00", to: "2020-12-01T00:00:00") {
+            contributionCalendar {
+                totalContributions
+                weeks {
+                contributionDays {
+                    contributionCount
+                    weekday
+                    date
+                }
+                }
+            }
+            }
+        }
+        }
+        """
+        request = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
+        pprint(request.json())
+'''
 
 
 
