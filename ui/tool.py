@@ -21,26 +21,6 @@ user data to be pulled:
         r = requests.get(query_url, headers=headers, params=params)
 
 
-repo data to be pulled
-    created at : 
-    updated at :
-    "size"
-    "has_wiki"
-    "forks":
-    "open_issues":
-    "watchers":
-    "network_count":
-    "subscribers_count":
-
-    query:
-     query_url = f"https://api.github.com/repos/{owner}/{repo}"
-        params = {
-            "state": "open",
-        }
-        headers = {'Authorization': f'token {self.token}'}
-        r = requests.get(query_url, headers=headers, params=params)
-
-
 
 users contributions by date : 
 NOTE : to get all contributions, remove the parenthesis and parameters after contributionsCollection.
@@ -236,7 +216,7 @@ class RepoSummariser:
             data[f"{user}"] = temp_repo_list
          
         with open(f"data/{self.repo}_all_users_filtered_repo.json","w") as outfile:
-            json.dump(data,outfile)   
+            json.dump(data,outfile,indent = 4)   
     
 
     def get_repo_commits(self):
@@ -312,8 +292,13 @@ class RepoSummariser:
         with open(f"data/{self.repo}_users_repo_sha_usefull_commits.json",) as Inpfile:
             data = json.load(Inpfile)
         
+        repos = {}
+        with open(f"data/{self.repo}_all_users_filtered_repo.json",) as inpFile:
+            repos = json.load(inpFile)
+            
         user_data = {}
         for user,repos_dict in data.items():
+           
             repo_data = {}
             
             for repo_name, shas in repos_dict.items():
@@ -363,6 +348,7 @@ class RepoSummariser:
                                 if key == "filename" or key == "status" or key == "additions" or key == "deletions" or key == "patch":
                                     temp_file[key] = val
                             temp_file["message"] = message
+                            temp_file["date"] = temp["commit"]["author"]["date"]
                             if eligible is True:
                                 total_files.append(temp_file)
                             
@@ -383,75 +369,143 @@ class RepoSummariser:
         pprint(r.json())
 
 
+
+    def repo_graph_details(self,owner,name):
+        
+        headers = {'Authorization': f'token {self.token}'}
+        query ="""
+        {{
+          repository(owner: "{owner}", name: "{name}") {{
+            repositoryTopics(first: 100) {{
+              edges {{
+                node {{
+                  topic {{
+                    name
+                  }}
+                }}
+              }}
+            }}
+          }}
+        }}
+        """
+        variables = {
+           'owner' : owner,
+           'name' :  name
+        }
+
+        request = requests.post('https://api.github.com/graphql', json={'query': query.format(**variables)}, headers=headers)
+        print(query.format(**variables))
+        #print(request.json())
+        
+        data = request.json()
+        data = data["data"]["repository"]["repositoryTopics"]["edges"]
+        
+        return data 
+        with open(f"data/temp_graph_data.json","w") as outfile:
+            json.dump(request.json(),outfile,indent=4)
+    
+    def user_analytic_details(self,user):
+        
+        query_url = f"https://api.github.com/users/{user}"
+        params = {
+            "state": "open",
+        }
+        headers = {'Authorization': f'token {self.token}'}
+        r = requests.get(query_url, headers=headers, params=params)
+        
+        data = r.json()
+        
+        query_url = f"https://api.github.com/users/{user}/orgs"
+        
+        r = requests.get(query_url, headers=headers, params=params)
+        
+        data['orgs'] = r.json()
+        
+        return data
+    
+    def repo_analysis_details(self):
+        repos_details = []
+        with open(f"data/{self.repo}_all_users_filtered_repo.json",) as inpFile:
+            repos_details = json.load(inpFile)
+        
+        user_repo_details = {}
+        with open(f"data/{self.repo}_users_repo_files_data.json",) as inpFile:
+            user_repo_details = json.load(inpFile)
+        
+        
+        
+        
+        for user,repos_data in repos_details.items():
+            repos = user_repo_details[user]
+            
+            for repo_data in repos_data:
+                owner,repo = repo_data['full_name'].split('/')
+                tags = self.repo_graph_details(owner,repo)
+                processed_tags = []
+                for node in tags:
+                    processed_tags.append(node['node']['topic']['name'])
+                
+                #print(processed_tags)
+                
+                repo_processed_data = repos[f"{owner}_{repo}"]
+                
+                repo_processed_data = {  "additions": repo_processed_data["additions"],
+                                         "deletions": repo_processed_data["deletions"],
+                                         'created_at': repo_data['created_at'],
+                                         'updated_at': repo_data['updated_at'],
+                                         'size': repo_data['size'],
+                                         'has_wiki': repo_data['has_wiki'],
+                                         'open_issues_count': repo_data['open_issues_count'],
+                                         'watchers_count': repo_data["watchers_count"],
+                                         "forks_count":repo_data["forks_count"],
+                                         'tags' : processed_tags,
+                                         'commit_files': repo_processed_data['files'],
+                                          
+                                          }
+                repos[f"{owner}_{repo}"] = repo_processed_data
+            
+            
+            ## processing user data from here
+            user_data = self.user_analytic_details(user)
+            
+            user_repo_details[user] = {    'login' : user_data['login'],
+                                            'type' : user_data['type'],                                       
+                                            'bio': user_data['bio'],
+                                            'blog': user_data['blog'],
+                                            'company': user_data['company'],
+                                            'created_at': user_data['created_at'],
+                                            'public_repos': user_data['public_repos'],
+                                            'followers': user_data['followers'],
+                                            'organizations': user_data['orgs'],
+                                            'repos':repos
+                                            }
+        
+        with open(f"data/{self.repo}_users_repo_complete_data.json","w") as outfile:
+            json.dump(user_repo_details,outfile,indent=4)
+
     def start_processing(self):
         ''' Driving function to run the tool '''
 
         print( "Starting the Data Extraction Process")
-        self.get_contributors_list()
-        self.get_contributor_login()
-        self.get_all_user_repos()
-        self.filter_valid_repos()
-        self.get_repo_commits()
-        self.filtered_commits()
-        self.commit_sha_exploration()
+        #self.get_contributors_list()
+        #self.get_contributor_login()
+        #self.get_all_user_repos()
+        #self.filter_valid_repos()
+        #self.get_repo_commits()
+        #self.filtered_commits()
+        #self.commit_sha_exploration()
+        
+        #self.repo_graph_details("oppia","oppia")
+        
         print( "Ending the Data Extraction Process")
     
-    def Repo_Details(self):
-        
-        query_url = f"https://api.github.com/users/sam3926"
-        print(query_url)
-        header = {'Authorization': f'token {self.token}'}
-        r = requests.get(query_url,headers = header)
-        pprint(r.json())
 
-    def graph_intro(self):
-        headers = {'Authorization': f'token {self.token}'}
-        query = """
-        {
-          
-            name
-            kind
-            description
-            fields {
-              name
-            }
-          
-        }
-        """
-
-        request = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
-        #print(request.json())
-        with open(f"data/temp_graph_inspect_data.json","w") as outfile:
-            json.dump(request.json(),outfile,indent=4)
-        
-    def repo_graph_details(self):
-        
-        headers = {'Authorization': f'token {self.token}'}
-        query = """
-        {
-          repository(owner: "oppia", name: "oppia") {
-            repositoryTopics(first: 10) {
-              edges {
-                node {
-                  topic {
-                    name
-                  }
-                }
-              }
-            }
-          }
-        }
-        """
-
-        request = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
-        #print(request.json())
-        with open(f"data/temp_graph_data.json","w") as outfile:
-            json.dump(request.json(),outfile,indent=4)
-            
 if __name__ == "__main__":
-    classObject = RepoSummariser("<token>")
+    classObject = RepoSummariser("fee6245af4a1b129fb6c20f5f5b7981f8732bc0d")
     classObject.rate_check()
     classObject.initialise_repo("arpit1912","SE-gamedev")
-    #classObject.start_processing()
-    classObject.graph_intro()
-    #classObject.Repo_Details()
+    # classObject.start_processing()
+    #classObject.graph_intro()
+    #classObject.user_analytic_details("arpit1912")
+
+    classObject.repo_analysis_details()
