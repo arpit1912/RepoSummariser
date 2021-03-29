@@ -1,3 +1,49 @@
+'''
+@arpit1912:
+
+user data to be pulled:
+    login
+    type : user/organization/enterprize
+    'bio': 
+    'blog': 
+    'company': 
+    'created_at': 
+    'public_repos':
+    followers:
+    organizations: query_url = f"https://api.github.com/users/{user}/orgs"
+
+    query:
+        query_url = f"https://api.github.com/users/{user}"
+        params = {
+            "state": "open",
+        }
+        headers = {'Authorization': f'token {token}'}
+        r = requests.get(query_url, headers=headers, params=params)
+
+
+repo data to be pulled
+    created at : 
+    updated at :
+    "size"
+    "has_wiki"
+    "forks":
+    "open_issues":
+    "watchers":
+    "network_count":
+    "subscribers_count":
+
+    query:
+     query_url = f"https://api.github.com/repos/{owner}/{repo}"
+        params = {
+            "state": "open",
+        }
+        headers = {'Authorization': f'token {self.token}'}
+        r = requests.get(query_url, headers=headers, params=params)
+    '''
+
+
+
+
 # Importing the Libraries
 from github import Github       # The Github Api Library
 import requests                 # for Request Handling
