@@ -1,3 +1,55 @@
+'''
+@arpit1912:
+
+user data to be pulled:
+    login
+    type : user/organization/enterprize
+    'bio': 
+    'blog': 
+    'company': 
+    'created_at': 
+    'public_repos':
+    followers:
+    organizations: query_url = f"https://api.github.com/users/{user}/orgs"
+
+    query:
+        query_url = f"https://api.github.com/users/{user}"
+        params = {
+            "state": "open",
+        }
+        headers = {'Authorization': f'token {token}'}
+        r = requests.get(query_url, headers=headers, params=params)
+
+
+
+users contributions by date : 
+NOTE : to get all contributions, remove the parenthesis and parameters after contributionsCollection.
+Specify correct date range to get data : YYYY-MM-DD ; Also, to and from date range cannot exceed one year
+
+
+        headers = {'Authorization': f'token {token}'}
+        query = """
+        {
+        user(login: "sam3926") {
+            contributionsCollection (from: "2020-01-01T00:00:00", to: "2020-12-01T00:00:00") {
+            contributionCalendar {
+                totalContributions
+                weeks {
+                contributionDays {
+                    contributionCount
+                    weekday
+                    date
+                }
+                }
+            }
+            }
+        }
+        }
+        """
+        request = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
+        pprint(request.json())
+'''
+
 
 
 
@@ -8,7 +60,7 @@ import json                     # for Data handling
 import mimetypes                # for filtering the files
 import re                       # for writing Regular Expressions
 from pprint import pprint
-from datetime import datetime, date, timedelta
+
 
 class RepoSummariser:
     
@@ -102,7 +154,7 @@ class RepoSummariser:
         headers = {'Authorization': f'token {self.token}'}
         r = requests.get(query_url, headers=headers, params=params)
         #pprint(r.json())
-        with open(f"data/{repo}_data.json","w") as outfile:
+        with open(f"data/temp_data.json","w") as outfile:
             json.dump(r.json(),outfile,indent=4)
         
         return r.json()            
@@ -321,7 +373,7 @@ class RepoSummariser:
         query = """
         {{
           user(login: "{user}") {{
-            contributionsCollection (from: "{enddate}", to: "{startdate}") {{
+            contributionsCollection (from: "2020-03-01T00:00:00", to: "2021-03-01T00:00:00") {{
               contributionCalendar {{
                 totalContributions
                 weeks {{
@@ -336,18 +388,12 @@ class RepoSummariser:
           }}
         }}
         """
-        startdate = datetime.utcnow()
-        startdate -= timedelta(days = 1)
-        print(startdate)
         variables = {
-            'user': user,
-            'startdate': startdate.strftime("%Y-%m-%dT00:00:00"),
-            'enddate': (startdate - timedelta(days = (365))).strftime("%Y-%m-%dT00:00:00")
+            'user': user
         }
-        print(query.format(**variables))
         request = requests.post('https://api.github.com/graphql', json={'query': query.format(**variables)}, headers=headers)
-        #pprint(request.json())
-        return request.json()
+        pprint(request.json())
+
 
     def repo_graph_details(self,owner,name):
         
@@ -402,59 +448,6 @@ class RepoSummariser:
         
         return data
     
-    def repo_languages(self,owner,repo):
-        
-        query_url = f"https://api.github.com/repos/{owner}/{repo}/languages"
-        params = {
-            "state": "open",
-        }
-        headers = {'Authorization': f'token {self.token}'}
-        r = requests.get(query_url, headers=headers, params=params)
-        
-        data = r.json()
-        return data
-
-
-    def main_repo_details(self):
-
-        self.repo_details(self.owner,self.repo)   
-
-        repo_data = []
-        contributors = []
-
-        with open(f"data/{self.repo}_data.json",) as inpFile:
-            repo_data = json.load(inpFile)
-
-        with open(f"data/{self.repo}_contributors.json",) as inpFile:
-            contributors = json.load(inpFile)
-
-        tags = self.repo_graph_details(self.owner,self.repo)
-        processed_tags = []
-        for node in tags:
-            processed_tags.append(node['node']['topic']['name'])
-
-        total_commits, garbage =  self.calculated_contribution(self.owner,self.repo)            
-        
-        repo_processed_data = {
-                                         'created_at': repo_data['created_at'],
-                                         'updated_at': repo_data['updated_at'],
-                                         "description": repo_data["description"],
-                                         'size': repo_data['size'],
-                                         'has_wiki': repo_data['has_wiki'],
-                                         'open_issues_count': repo_data['open_issues_count'],
-                                         'watchers_count': repo_data["watchers_count"],
-                                         "forks_count":repo_data["forks_count"],
-                                         'tags' : processed_tags,
-                                         "total_contributors" : len(contributors),
-                                         "total_commits" : total_commits,
-                                         "languages" : self.repo_languages(self.owner,self.repo)
-        }
-
-        pprint(repo_processed_data)
-        with open(f"data/{self.repo}_main_data.json","w") as outfile:
-            json.dump(repo_processed_data, outfile, indent=4)
-        return repo_processed_data
-
     def repo_analysis_details(self):
         repos_details = []
         with open(f"data/{self.repo}_all_users_filtered_repo.json",) as inpFile:
@@ -480,9 +473,6 @@ class RepoSummariser:
                 #print(processed_tags)
                 
                 repo_processed_data = repos[f"{owner}_{repo}"]
-                contributors = []
-                with open(f"data/{repo}_contributors.json",) as inpFile:
-                    contributors = json.load(inpFile)
                 
                 repo_processed_data = {  "additions": repo_processed_data["additions"],
                                          "deletions": repo_processed_data["deletions"],
@@ -495,8 +485,7 @@ class RepoSummariser:
                                          "forks_count":repo_data["forks_count"],
                                          'tags' : processed_tags,
                                          'commit_files': repo_processed_data['files'],
-                                          "total_contributors" : len(contributors),
-                                          "languages" : self.repo_languages(owner,repo)
+                                          
                                           }
                 repos[f"{owner}_{repo}"] = repo_processed_data
             
@@ -509,7 +498,6 @@ class RepoSummariser:
                                             'bio': user_data['bio'],
                                             'blog': user_data['blog'],
                                             'company': user_data['company'],
-                                            'contributions': self.get_user_last_year_commits(user),
                                             'created_at': user_data['created_at'],
                                             'public_repos': user_data['public_repos'],
                                             'followers': user_data['followers'],
@@ -533,13 +521,12 @@ class RepoSummariser:
         #self.commit_sha_exploration()
         
         #self.repo_graph_details("oppia","oppia")
-        #self.get_user_last_year_commits("arpit1912")
-        self.main_repo_details()
+        self.get_user_last_year_commits("arpit1912")
         print( "Ending the Data Extraction Process")
     
 
 if __name__ == "__main__":
-    classObject = RepoSummariser("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")
+    classObject = RepoSummariser("fee6245af4a1b129fb6c20f5f5b7981f8732bc0d")
     classObject.rate_check()
     classObject.initialise_repo("arpit1912","SE-gamedev")
     classObject.start_processing()
