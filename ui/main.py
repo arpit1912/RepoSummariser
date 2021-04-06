@@ -45,22 +45,28 @@ def ac_connect(dom):
   dom.inner("", open( "Main.html").read() )
   dom.focus( "token")
 
-def ac_submit(dom):
-  username = dom.get_value("reponame")
-  reponame = dom.get_value("username")
-  token = dom.get_value("token")
-  print(reponame,username,token)
-  obj = RepoSummariser(token)
-  obj.initialise_repo(username,reponame)
-  obj.start_processing()
-  dom.alert("Hello, {}!".format(reponame+username+token))
-  dom.focus( "token")
-
 def ac_clear(dom):
   if ( dom.confirm("Are you sure?" ) ):
     dom.set_value("token", "" )
     dom.set_value("username", "" )
     dom.set_value("reponame", "" )
+    dom.set_value("email", "" )
+  dom.focus( "token")
+
+def ac_submit(dom):
+  username = dom.get_value("reponame")
+  reponame = dom.get_value("username")
+  token = dom.get_value("token")
+  email = dom.get_value("email")
+  #print(reponame,username,token)
+  obj = RepoSummariser(token)
+  obj.initialise_repo(username,reponame)
+  obj.start_processing()
+  dom.alert("Submitted! The report once ready will be mailed to "+email)
+  dom.set_value("token", "" )
+  dom.set_value("username", "" )
+  dom.set_value("reponame", "" )
+  dom.set_value("email", "" )
   dom.focus( "token")
 
 callbacks = {
