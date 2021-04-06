@@ -1,55 +1,3 @@
-'''
-@arpit1912:
-
-user data to be pulled:
-    login
-    type : user/organization/enterprize
-    'bio': 
-    'blog': 
-    'company': 
-    'created_at': 
-    'public_repos':
-    followers:
-    organizations: query_url = f"https://api.github.com/users/{user}/orgs"
-
-    query:
-        query_url = f"https://api.github.com/users/{user}"
-        params = {
-            "state": "open",
-        }
-        headers = {'Authorization': f'token {token}'}
-        r = requests.get(query_url, headers=headers, params=params)
-
-
-
-users contributions by date : 
-NOTE : to get all contributions, remove the parenthesis and parameters after contributionsCollection.
-Specify correct date range to get data : YYYY-MM-DD ; Also, to and from date range cannot exceed one year
-
-
-        headers = {'Authorization': f'token {token}'}
-        query = """
-        {
-        user(login: "sam3926") {
-            contributionsCollection (from: "2020-01-01T00:00:00", to: "2020-12-01T00:00:00") {
-            contributionCalendar {
-                totalContributions
-                weeks {
-                contributionDays {
-                    contributionCount
-                    weekday
-                    date
-                }
-                }
-            }
-            }
-        }
-        }
-        """
-        request = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
-        pprint(request.json())
-'''
-
 
 
 
@@ -60,7 +8,7 @@ import json                     # for Data handling
 import mimetypes                # for filtering the files
 import re                       # for writing Regular Expressions
 from pprint import pprint
-
+from datetime import datetime, date, timedelta
 
 class RepoSummariser:
     
@@ -368,7 +316,38 @@ class RepoSummariser:
         r = requests.get(query_url, headers=headers)
         pprint(r.json())
 
-
+    def get_user_last_year_commits(self,user):
+        headers = {'Authorization': f'token {self.token}'}
+        query = """
+        {{
+          user(login: "{user}") {{
+            contributionsCollection (from: "{enddate}", to: "{startdate}") {{
+              contributionCalendar {{
+                totalContributions
+                weeks {{
+                  contributionDays {{
+                    contributionCount
+                    weekday
+                    date
+                  }}
+                }}
+              }}
+            }}
+          }}
+        }}
+        """
+        startdate = datetime.utcnow()
+        startdate -= timedelta(days = 1)
+        print(startdate)
+        variables = {
+            'user': user,
+            'startdate': startdate.strftime("%Y-%m-%dT00:00:00"),
+            'enddate': (startdate - timedelta(days = (365))).strftime("%Y-%m-%dT00:00:00")
+        }
+        print(query.format(**variables))
+        request = requests.post('https://api.github.com/graphql', json={'query': query.format(**variables)}, headers=headers)
+        #pprint(request.json())
+        return request.json()
 
     def repo_graph_details(self,owner,name):
         
@@ -423,6 +402,19 @@ class RepoSummariser:
         
         return data
     
+    def repo_languages(self,owner,repo):
+        
+        query_url = f"https://api.github.com/repos/{owner}/{repo}/languages"
+        params = {
+            "state": "open",
+        }
+        headers = {'Authorization': f'token {self.token}'}
+        r = requests.get(query_url, headers=headers, params=params)
+        
+        data = r.json()
+        return data
+        
+
     def repo_analysis_details(self):
         repos_details = []
         with open(f"data/{self.repo}_all_users_filtered_repo.json",) as inpFile:
@@ -448,6 +440,9 @@ class RepoSummariser:
                 #print(processed_tags)
                 
                 repo_processed_data = repos[f"{owner}_{repo}"]
+                contributors = []
+                with open(f"data/{repo}_contributors.json",) as inpFile:
+                    contributors = json.load(inpFile)
                 
                 repo_processed_data = {  "additions": repo_processed_data["additions"],
                                          "deletions": repo_processed_data["deletions"],
@@ -460,7 +455,8 @@ class RepoSummariser:
                                          "forks_count":repo_data["forks_count"],
                                          'tags' : processed_tags,
                                          'commit_files': repo_processed_data['files'],
-                                          
+                                          "total_contributors" : len(contributors),
+                                          "languages" : self.repo_languages(owner,repo)
                                           }
                 repos[f"{owner}_{repo}"] = repo_processed_data
             
@@ -473,6 +469,7 @@ class RepoSummariser:
                                             'bio': user_data['bio'],
                                             'blog': user_data['blog'],
                                             'company': user_data['company'],
+                                            'contributions': self.get_user_last_year_commits(user),
                                             'created_at': user_data['created_at'],
                                             'public_repos': user_data['public_repos'],
                                             'followers': user_data['followers'],
@@ -496,7 +493,7 @@ class RepoSummariser:
         #self.commit_sha_exploration()
         
         #self.repo_graph_details("oppia","oppia")
-        
+        #self.get_user_last_year_commits("arpit1912")
         print( "Ending the Data Extraction Process")
     
 
@@ -504,7 +501,7 @@ if __name__ == "__main__":
     classObject = RepoSummariser("fee6245af4a1b129fb6c20f5f5b7981f8732bc0d")
     classObject.rate_check()
     classObject.initialise_repo("arpit1912","SE-gamedev")
-    # classObject.start_processing()
+    #classObject.start_processing()
     #classObject.graph_intro()
     #classObject.user_analytic_details("arpit1912")
 
