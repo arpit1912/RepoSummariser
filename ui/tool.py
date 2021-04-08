@@ -18,14 +18,12 @@ class RepoSummariser:
         self.token = token
         self.g = Github(token)
     
-
     def initialise_repo(self,owner,repo):
         ''' initialise the owner and the repo name through this function '''
 
         self.owner = owner
         self.repo = repo
     
-
     def get_contributors_list(self):
         ''' this Function give the Contributor list of the repo given'''
 
@@ -51,7 +49,6 @@ class RepoSummariser:
         with open(f"data/{self.repo}_contributors.json","w") as outfile:
             json.dump(data,outfile)
 
-
     def get_contributor_login(self):
         ''' Find the login details of the contributors'''
 
@@ -63,12 +60,23 @@ class RepoSummariser:
         for user in contributor_list:
             if user.get('login') != None:
                 user_names.append(user['login'])
-                
+
+        query_url = f"https://api.github.com/user"
+        params = {
+            "state": "open",
+        }
+        headers = {'Authorization': f'token {self.token}'}
+        r = requests.get(query_url, headers=headers, params=params)
+        
+        user_data = r.json()
+
+        self.main_login = user_data['login']
+        user_names.append(user_data['login'])
         data = {'users': user_names}
+
         with open(f"data/{self.repo}_all_users.json","w") as outfile:
             json.dump(data,outfile)
     
-
     def get_all_user_repos(self):
         ''' Get all the Repo on which the user works using the login details '''
     
@@ -91,7 +99,6 @@ class RepoSummariser:
         with open(f"data/{self.repo}_all_users_repo.json","w") as outfile:
             json.dump(data,outfile)
     
-
     def repo_details(self,owner,repo):
         ''' Fetch a more elaborate  detail of the Repo  '''
 
@@ -102,12 +109,11 @@ class RepoSummariser:
         headers = {'Authorization': f'token {self.token}'}
         r = requests.get(query_url, headers=headers, params=params)
         #pprint(r.json())
-        with open(f"data/temp_data.json","w") as outfile:
+        with open(f"data/{repo}_data.json","w") as outfile:
             json.dump(r.json(),outfile,indent=4)
         
         return r.json()            
     
-
     def calculated_contribution(self,owner,main_repo):
         '''  calcuate the contribution of a user in the Repo '''
 
@@ -126,7 +132,6 @@ class RepoSummariser:
                 
         return total_contributions, user_contribution
     
-
     def filter_valid_repos(self):
         ''' filter the repo based on the user contribution '''
     
@@ -166,7 +171,6 @@ class RepoSummariser:
         with open(f"data/{self.repo}_all_users_filtered_repo.json","w") as outfile:
             json.dump(data,outfile,indent = 4)   
     
-
     def get_repo_commits(self):
         ''' Find the commits in a repo '''
     
@@ -232,7 +236,6 @@ class RepoSummariser:
         with open(f"data/{self.repo}_users_repo_sha_usefull_commits.json","w") as outfile:
             json.dump(new_data,outfile,indent=4)
     
-
     def commit_sha_exploration(self):
         ''' Fetch the data from the filtered commit details '''
     
@@ -305,7 +308,6 @@ class RepoSummariser:
         
         with open(f"data/{self.repo}_users_repo_files_data.json","w") as outfile:
             json.dump(user_data,outfile,indent=4)
-
 
     def rate_check(self):
         ''' To check the number of request left for the given token '''
@@ -413,7 +415,46 @@ class RepoSummariser:
         
         data = r.json()
         return data
+
+    def main_repo_details(self):
+
+        self.repo_details(self.owner,self.repo)   
+
+        repo_data = []
+        contributors = []
+
+        with open(f"data/{self.repo}_data.json",) as inpFile:
+            repo_data = json.load(inpFile)
+
+        with open(f"data/{self.repo}_contributors.json",) as inpFile:
+            contributors = json.load(inpFile)
+
+        tags = self.repo_graph_details(self.owner,self.repo)
+        processed_tags = []
+        for node in tags:
+            processed_tags.append(node['node']['topic']['name'])
+
+        total_commits, garbage =  self.calculated_contribution(self.owner,self.repo)            
         
+        repo_processed_data = {
+                                         'created_at': repo_data['created_at'],
+                                         'updated_at': repo_data['updated_at'],
+                                         "description": repo_data["description"],
+                                         'size': repo_data['size'],
+                                         'has_wiki': repo_data['has_wiki'],
+                                         'open_issues_count': repo_data['open_issues_count'],
+                                         'watchers_count': repo_data["watchers_count"],
+                                         "forks_count":repo_data["forks_count"],
+                                         'tags' : processed_tags,
+                                         "total_contributors" : len(contributors),
+                                         "total_commits" : total_commits,
+                                         "languages" : self.repo_languages(self.owner,self.repo)
+        }
+
+        pprint(repo_processed_data)
+        with open(f"data/{self.repo}_main_data.json","w") as outfile:
+            json.dump(repo_processed_data, outfile, indent=4)
+        return repo_processed_data
 
     def repo_analysis_details(self):
         repos_details = []
@@ -423,7 +464,6 @@ class RepoSummariser:
         user_repo_details = {}
         with open(f"data/{self.repo}_users_repo_files_data.json",) as inpFile:
             user_repo_details = json.load(inpFile)
-        
         
         
         
@@ -476,33 +516,44 @@ class RepoSummariser:
                                             'organizations': user_data['orgs'],
                                             'repos':repos
                                             }
-        
-        with open(f"data/{self.repo}_users_repo_complete_data.json","w") as outfile:
-            json.dump(user_repo_details,outfile,indent=4)
+        other_user_data = {}
+        main_user_data = {}
+        for key,value in user_repo_details.items():
+            if key == self.main_login:
+                print("main user came!")
+                main_user_data[key] = value
+            else:
+                other_user_data[key] = value
 
+        with open(f"data/{self.repo}_users_repo_complete_data.json","w") as outfile:
+            json.dump(other_user_data,outfile,indent=4)
+
+
+        with open(f"data/user_complete_data.json","w") as outfile:
+            json.dump(main_user_data,outfile,indent=4)
+   
     def start_processing(self):
         ''' Driving function to run the tool '''
 
         print( "Starting the Data Extraction Process")
         #self.get_contributors_list()
-        #self.get_contributor_login()
-        #self.get_all_user_repos()
-        #self.filter_valid_repos()
-        #self.get_repo_commits()
-        #self.filtered_commits()
-        #self.commit_sha_exploration()
-        
-        #self.repo_graph_details("oppia","oppia")
-        #self.get_user_last_year_commits("arpit1912")
+        self.get_contributor_login()
+        self.get_all_user_repos()
+        self.filter_valid_repos()
+        self.get_repo_commits()
+        self.filtered_commits()
+        self.commit_sha_exploration()
+        self.repo_analysis_details()
+        self.main_repo_details()
         print( "Ending the Data Extraction Process")
     
 
 if __name__ == "__main__":
-    classObject = RepoSummariser("fee6245af4a1b129fb6c20f5f5b7981f8732bc0d")
+    classObject = RepoSummariser("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")
     classObject.rate_check()
     classObject.initialise_repo("arpit1912","SE-gamedev")
-    #classObject.start_processing()
+    classObject.start_processing()
     #classObject.graph_intro()
     #classObject.user_analytic_details("arpit1912")
 
-    classObject.repo_analysis_details()
+    #classObject.repo_analysis_details()
