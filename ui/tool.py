@@ -1,6 +1,3 @@
-
-
-
 # Importing the Libraries
 from github import Github       # The Github Api Library
 import requests                 # for Request Handling
@@ -192,7 +189,7 @@ class RepoSummariser:
                 }
                 headers = {'Authorization': f'token {self.token}'}
                 r = requests.get(query_url, headers=headers, params=params)
-                data[f"{owner}_{repo}"] = r.json()
+                data[f"{owner}/{repo}"] = r.json()
     
                 while(len(r.json())!=0):
                     query_url = f"https://api.github.com/repos/{owner}/{repo}/commits?page={count}&per_page=10000"
@@ -201,7 +198,7 @@ class RepoSummariser:
                             }
                     headers = {'Authorization': f'token {self.token}'}
                     r = requests.get(query_url, headers=headers, params=params)
-                    data[f"{owner}_{repo}"] = data[f"{owner}_{repo}"] + r.json()
+                    data[f"{owner}/{repo}"] = data[f"{owner}/{repo}"] + r.json()
                     count = count + 1
     
             DATA[f"{user}"] = data
@@ -224,9 +221,9 @@ class RepoSummariser:
                 usefull_commits = []
                 #total_commits = len(repo)
                 for commit in commits:
-                    #print(commit["author"])
-                    if commit["author"] != None and commit["author"]["login"] == user:
-                        print(user,commit["author"]["login"],usefull_commits)
+                    print(repo_name, commit["author"])
+                    if commit["author"] != None and bool(commit["author"]) and commit["author"]["login"] == user:
+                        #print(user,commit["author"]["login"],usefull_commits)
                         usefull_commits.append(commit["sha"])
                     
                 temp[repo_name] = usefull_commits
@@ -259,7 +256,7 @@ class RepoSummariser:
                 
                 total_files = []
                 
-                owner = repo_name.split("_")[0]
+                owner = repo_name.split("/")[0]
                 repo = repo_name[len(owner)+1:]
                 print(owner,repo)
                 
@@ -479,7 +476,7 @@ class RepoSummariser:
                 
                 #print(processed_tags)
                 
-                repo_processed_data = repos[f"{owner}_{repo}"]
+                repo_processed_data = repos[f"{owner}/{repo}"]
                 contributors = []
                 with open(f"data/{repo}_contributors.json",) as inpFile:
                     contributors = json.load(inpFile)
@@ -498,7 +495,7 @@ class RepoSummariser:
                                           "total_contributors" : len(contributors),
                                           "languages" : self.repo_languages(owner,repo)
                                           }
-                repos[f"{owner}_{repo}"] = repo_processed_data
+                repos[f"{owner}/{repo}"] = repo_processed_data
             
             
             ## processing user data from here
@@ -536,11 +533,12 @@ class RepoSummariser:
         ''' Driving function to run the tool '''
 
         print( "Starting the Data Extraction Process")
-        #self.get_contributors_list()
+        self.get_contributors_list()
         self.get_contributor_login()
         self.get_all_user_repos()
         self.filter_valid_repos()
         self.get_repo_commits()
+        
         self.filtered_commits()
         self.commit_sha_exploration()
         self.repo_analysis_details()
@@ -549,11 +547,7 @@ class RepoSummariser:
     
 
 if __name__ == "__main__":
-    classObject = RepoSummariser("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")
+    classObject = RepoSummariser("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")
     classObject.rate_check()
-    classObject.initialise_repo("arpit1912","SE-gamedev")
+    classObject.initialise_repo("krish7777","food4all")
     classObject.start_processing()
-    #classObject.graph_intro()
-    #classObject.user_analytic_details("arpit1912")
-
-    #classObject.repo_analysis_details()

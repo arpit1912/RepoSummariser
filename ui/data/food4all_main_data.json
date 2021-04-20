@@ -1,0 +1,19 @@
+{
+    "created_at": "2020-10-03T20:22:26Z",
+    "updated_at": "2021-03-24T11:33:28Z",
+    "description": "A web application to achieve zero hunger by connecting food donors with charity organizations.",
+    "size": 11573,
+    "has_wiki": true,
+    "open_issues_count": 0,
+    "watchers_count": 0,
+    "forks_count": 2,
+    "tags": [],
+    "total_contributors": 4,
+    "total_commits": 333,
+    "languages": {
+        "JavaScript": 239256,
+        "HTML": 4739,
+        "CSS": 4373,
+        "Less": 3892
+    }
+}
