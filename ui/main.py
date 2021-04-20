@@ -38,8 +38,8 @@ except:
 
 fields = []
 
-obj = RepoSummariser("9ab3c7cf2a89afde31a4a30dec51c7bbaf2de1f8")
-obj.rate_check()
+#obj = RepoSummariser("9ab3c7cf2a89afde31a4a30dec51c7bbaf2de1f8")
+#obj.rate_check()
 
 def ac_connect(dom):
   dom.inner("", open( "Main.html").read() )
@@ -50,23 +50,73 @@ def ac_clear(dom):
     dom.set_value("token", "" )
     dom.set_value("username", "" )
     dom.set_value("reponame", "" )
-    dom.set_value("email", "" )
   dom.focus( "token")
 
-def ac_submit(dom):
-  username = dom.get_value("reponame")
-  reponame = dom.get_value("username")
-  token = dom.get_value("token")
-  email = dom.get_value("email")
-  #print(reponame,username,token)
+def checktokenvalidity (token):
   obj = RepoSummariser(token)
-  obj.initialise_repo(username,reponame)
-  obj.start_processing()
-  dom.alert("Submitted! The report once ready will be mailed to "+email)
-  dom.set_value("token", "" )
-  dom.set_value("username", "" )
-  dom.set_value("reponame", "" )
-  dom.set_value("email", "" )
+  try:
+    obj.g.get_repo("oppia/oppia")
+  except:
+      print ('Invalid github access token')
+      return False
+  else:
+    return True
+
+def checkrepovalidity (token, reponame):
+  obj = RepoSummariser(token)
+  try:
+    obj.g.get_repo(reponame)
+  except:
+      print ('Invalid github access token')
+      return False
+  else:
+    return True
+
+def checkuservalidity (token, username):
+  obj = RepoSummariser(token)
+  try:
+    obj.g.get_user(username)
+  except:
+      print ('Invalid github access token')
+      return False
+  else:
+    return True
+      
+
+def ac_submit(dom):
+  username = dom.get_value("username")
+  reponame = dom.get_value("reponame")
+  token = dom.get_value("token")
+
+  #check if submitted token, username, repository are valid or not
+  error_params = []
+  valid_params = True
+
+  if checktokenvalidity (token) == False:
+    error_params.append("Github access token")
+    valid_params = False
+  if checkrepovalidity (token, reponame) == False:
+    error_params.append("Repository name")
+    valid_params = False
+  if checkuservalidity (token, username) == False:
+    error_params.append("Username")
+    valid_params = False
+  
+  if valid_params:
+    dom.alert("Submitted! The report once ready will be saved in Reports directory")
+    obj = RepoSummariser(token)
+    obj.initialise_repo(username,reponame)
+    obj.start_processing()
+    dom.set_value("token", "" )
+    dom.set_value("username", "" )
+    dom.set_value("reponame", "" )
+  else:
+    error_message = 'Invalid credentials, Check ' + error_params[0]
+    for x in range(len(error_params) - 1):
+      error_message = error_message + ", " + error_params[x+1]
+    
+    dom.alert(error_message)
+  
   dom.focus( "token")
 
 callbacks = {
