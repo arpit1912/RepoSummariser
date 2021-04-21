@@ -41,7 +41,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_text_color(128)
         self.cell(0, 10, 'Page ' + str(self.page_no()), 0, 0, 'C')
 
-    def page_body(self, images):
+    def page_body(self):
         # Determine how many plots there are per page and set positions
         # and margins accordingly
         '''
@@ -64,12 +64,12 @@ class PDF(FPDF, HTMLMixin):
         self.set_font('Arial', 'B', 18)
         self.set_text_color(186, 80, 100)
         #self.write_html("Analysis of repository + <b> reponame </b>")
-        self.multi_cell(w=0, h=14.0, align='C', txt="Analysis of repository "+  reponame  + " and userID " + username, border="")
+        self.multi_cell(w=0, h=14.0, align='C', txt="Analysis of repository "+  self.reponame  + " and userID " + self.username, border="")
         
         self.set_xy(10.0,self.get_y() + 2)
         self.set_font('Arial', 'B', 16)
         self.set_text_color(186, 80, 100)
-        self.cell(w=0.0, h=10.0, align='L', txt= reponame + " details" , border="T", link=repolink)
+        self.cell(w=0.0, h=10.0, align='L', txt= self.reponame + " details" , border="T", link=self.repolink)
         
         self.set_xy(14.0,self.get_y()+10)
         self.set_font('Arial', 'B', 14)
@@ -78,7 +78,7 @@ class PDF(FPDF, HTMLMixin):
         
         self.set_xy(self.get_x(), self.get_y())
         self.set_font('Arial', '', 14)
-        self.multi_cell(w=0.0, h=9.0, align='L', txt= repo_about, border=0)
+        self.multi_cell(w=0.0, h=9.0, align='L', txt= self.repo_about, border=0)
         
         self.set_xy(14, self.get_y())
         self.set_font('Arial', 'B', 14)
@@ -86,7 +86,7 @@ class PDF(FPDF, HTMLMixin):
         
         self.set_xy(self.get_x(), self.get_y())
         self.set_font('Arial', '', 14)
-        self.multi_cell(w=0.0, h=9.0, align='L', txt= repo_tags, border=0)
+        self.multi_cell(w=0.0, h=9.0, align='L', txt= self.repo_tags, border=0)
         
         self.set_xy(14.0,self.get_y())
         self.set_font('Arial', 'B', 14)
@@ -94,13 +94,13 @@ class PDF(FPDF, HTMLMixin):
         
         self.set_xy(22.0,self.get_y())
         self.set_font('Arial', '', 13)
-        self.multi_cell(w=0.0, h=6.0, align='L', txt= "Project Status: Active (last commit on "+repo_lastcommitdate+")\n" +
-                        "Date of creation: " + repo_doc + "\n" +
-                        "Contributors: " + repo_contricount + "\n" +
-                        "Commits: " + repo_contricount + "\n" +
-                        "Forks: " + repo_forkscount + "\n" +
-                        "Stars: " + repo_starscount + "\n" +
-                        "Open issues: " + repo_openissuecount + "\n", border=0)
+        self.multi_cell(w=0.0, h=6.0, align='L', txt= "Project Status: Active (last commit on "+self.repo_lastcommitdate+")\n" +
+                        "Date of creation: " + self.repo_doc + "\n" +
+                        "Contributors: " + self.repo_contricount + "\n" +
+                        "Commits: " + self.repo_contricount + "\n" +
+                        "Forks: " + self.repo_forkscount + "\n" +
+                        "Stars: " + self.repo_starscount + "\n" +
+                        "Open issues: " + self.repo_openissuecount + "\n", border=0)
         
         #repository language split
         self.set_xy(14.0,self.get_y()+5)
@@ -136,10 +136,10 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(76.0,41.0)
         self.set_font('Arial', 'B', 14)
         self.set_text_color(0, 0, 0)
-        self.cell(w=0.0, h=0.0, align='L', txt= username + ": " + user_activescore, border=0)
+        self.cell(w=0.0, h=0.0, align='L', txt= self.username + ": " + self.user_activescore, border=0)
         
         self.set_xy(76.0,49.0)
-        self.cell(w=0.0, h=0.0, align='L', txt= reponame + " contributors (avg): " + repo_activescore, border=0)
+        self.cell(w=0.0, h=0.0, align='L', txt= self.reponame + " contributors (avg): " + self.repo_activescore, border=0)
         
         self.set_xy(10.0,self.get_y() + 15)
         self.set_font('Arial', 'B', 20)
@@ -151,15 +151,15 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', 'B', 10)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=7.0, align='C', txt= reponame + " contributors minimal average", border="R")
+        self.multi_cell(w=60.0, h=7.0, align='C', txt= self.reponame + " contributors minimal average", border="R")
         
         self.set_font('Arial', 'B', 12)
         self.set_xy(115.0,height_y)
-        self.cell(w=30.0, h=7.0, align='C', txt= username, border="")
+        self.cell(w=30.0, h=7.0, align='C', txt= self.username, border="")
         
         self.set_font('Arial', 'B', 10)
         self.set_xy(145.0,height_y)
-        self.multi_cell(w=55.0, h=7.0, align='C', txt= reponame + " contributors maximal average", border="L")
+        self.multi_cell(w=55.0, h=7.0, align='C', txt= self.reponame + " contributors maximal average", border="L")
         
         #commits per day
         height_y = self.get_y()
@@ -172,13 +172,13 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= repo_cmin_commitperday, border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.repo_cmin_commitperday, border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=30.0, h=9.0, align='C', txt= user_commitperday, border="")
+        self.multi_cell(w=30.0, h=9.0, align='C', txt= self.user_commitperday, border="")
         
         self.set_xy(145.0,height_y)
-        self.multi_cell(w=55.0, h=9.0, align='C', txt= repo_cmax_commitperday, border="L")
+        self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_commitperday, border="L")
         
         #Open source projects contributed to
         height_y = self.get_y()
@@ -191,13 +191,13 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= repo_cmin_oscount, border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.repo_cmin_oscount, border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=30.0, h=9.0, align='C', txt= user_oscount, border="")
+        self.multi_cell(w=30.0, h=9.0, align='C', txt= self.user_oscount, border="")
         
         self.set_xy(145.0,height_y)
-        self.multi_cell(w=55.0, h=9.0, align='C', txt= repo_cmax_oscount, border="L")
+        self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_oscount, border="L")
         
         #Public repositories
         height_y = self.get_y()
@@ -210,13 +210,13 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= repo_cmin_publicrepocount, border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.repo_cmin_publicrepocount, border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=30.0, h=9.0, align='C', txt= user_publicrepocount, border="")
+        self.multi_cell(w=30.0, h=9.0, align='C', txt= self.user_publicrepocount, border="")
         
         self.set_xy(145.0,height_y)
-        self.multi_cell(w=55.0, h=9.0, align='C', txt= repo_cmax_publicrepocount, border="L")
+        self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_publicrepocount, border="L")
         
         #Account age
         height_y = self.get_y()
@@ -229,13 +229,13 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= repo_cmin_accountage, border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.repo_cmin_accountage, border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=30.0, h=9.0, align='C', txt= user_accountage, border="")
+        self.multi_cell(w=30.0, h=9.0, align='C', txt= self.user_accountage, border="")
         
         self.set_xy(145.0,height_y)
-        self.multi_cell(w=55.0, h=9.0, align='C', txt= repo_cmax_accountage, border="L")
+        self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_accountage, border="L")
         
         #Followers
         height_y = self.get_y()
@@ -248,13 +248,13 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= repo_cmin_followers, border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.repo_cmin_followers, border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=30.0, h=9.0, align='C', txt= user_followers, border="")
+        self.multi_cell(w=30.0, h=9.0, align='C', txt= self.user_followers, border="")
         
         self.set_xy(145.0,height_y)
-        self.multi_cell(w=55.0, h=9.0, align='C', txt= repo_cmax_followers, border="L")
+        self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_followers, border="L")
         
         #add more if needed
         #chart plotting these parametera
@@ -290,10 +290,10 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', 'B', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= username, border="LR")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.username, border="LR")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=80.0, h=9.0, align='C', txt= reponame + " contributors (average)", border="LR")
+        self.multi_cell(w=80.0, h=9.0, align='C', txt= self.reponame + " contributors (average)", border="LR")
         
         #language 1
         height_y = self.get_y()
@@ -305,10 +305,10 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= user_languagename[0] + " - "+ user_languagepercent[0], border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt=self.user_languagename[0] + " - "+ self.user_languagepercent[0], border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=80.0, h=9.0, align='C', txt= repo_languagename[0] + " - "+ repo_languagepercent[0], border="LR")
+        self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[0] + " - "+ self.repo_languagepercent[0], border="LR")
         
         #language 2
         height_y = self.get_y()
@@ -320,10 +320,10 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= user_languagename[1] + " - "+ user_languagepercent[1], border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.user_languagename[1] + " - "+ self.user_languagepercent[1], border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=80.0, h=9.0, align='C', txt= repo_languagename[1] + " - "+ repo_languagepercent[1], border="LR")
+        self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[1] + " - "+ self.repo_languagepercent[1], border="LR")
         
         #language 3
         height_y = self.get_y()
@@ -335,10 +335,10 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= user_languagename[2] + " - "+ user_languagepercent[2], border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.user_languagename[2] + " - "+ self.user_languagepercent[2], border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=80.0, h=9.0, align='C', txt= repo_languagename[2] + " - "+ repo_languagepercent[2], border="LR")
+        self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[2] + " - "+ self.repo_languagepercent[2], border="LR")
         
         #language 4
         height_y = self.get_y()
@@ -350,10 +350,10 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= user_languagename[3] + " - "+ user_languagepercent[3], border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.user_languagename[3] + " - "+ self.user_languagepercent[3], border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=80.0, h=9.0, align='C', txt= repo_languagename[3] + " - "+ repo_languagepercent[3], border="LR")
+        self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[3] + " - "+ self.repo_languagepercent[3], border="LR")
         
         #language 5
         height_y = self.get_y()
@@ -365,23 +365,23 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(55.0,height_y)
         self.set_font('Arial', '', 12)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=60.0, h=9.0, align='C', txt= user_languagename[4] + " - "+ user_languagepercent[4], border="R")
+        self.multi_cell(w=60.0, h=9.0, align='C', txt= self.user_languagename[4] + " - "+ self.user_languagepercent[4], border="R")
             
         self.set_xy(115.0,height_y)
-        self.multi_cell(w=80.0, h=9.0, align='C', txt= repo_languagename[4] + " - "+ repo_languagepercent[4], border="LR")
+        self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[4] + " - "+ self.repo_languagepercent[4], border="LR")
         
         #user language chart
         self.set_xy(14.0,self.get_y()+10)
         self.set_font('Arial', 'B', 14)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=0.0, h=9.0, align='L', txt=username + " languages: \n", border=0)
+        self.multi_cell(w=0.0, h=9.0, align='L', txt=self.username + " languages: \n", border=0)
         self.image('images/UserLanguage.png', 18.0, self.get_y() + 2.0, self.WIDTH - 40, 15)
         
         #contributor language chart
         self.set_xy(14.0,self.get_y() + 25)
         self.set_font('Arial', 'B', 14)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=0.0, h=9.0, align='L', txt= reponame + " contributors languages\n", border=0)
+        self.multi_cell(w=0.0, h=9.0, align='L', txt= self.reponame + " contributors languages\n", border=0)
         self.image('images/RepoLanguage.png', 18.0, self.get_y() + 2.0, self.WIDTH - 40, 15)
         
         self.set_xy(10.0,260)
@@ -405,7 +405,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(15.0,height_y)
         self.set_font('Arial', 'B', 15)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=0, h=10.0, align='C', txt="Average commits per day ("+username+") = " + user_commitperday , border="")
+        self.multi_cell(w=0, h=10.0, align='C', txt="Average commits per day ("+self.username+") = " + self.user_commitperday , border="")
         
         self.image('images/usercontrichart.png', 18.0, self.get_y() + 2.0, self.WIDTH - 40)
         
@@ -413,7 +413,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(15.0,height_y)
         self.set_font('Arial', 'B', 15)
         self.set_text_color(0, 0, 0)
-        self.multi_cell(w=0, h=10.0, align='C', txt="Average commits per day ("+reponame+" contributors) = " + repo_c_commitperday , border="")
+        self.multi_cell(w=0, h=10.0, align='C', txt="Average commits per day ("+self.reponame+" contributors) = " + self.repo_c_commitperday , border="")
         
         self.image('images/contrichart.png', 18.0, self.get_y() + 2.0, self.WIDTH - 40)
         
@@ -426,65 +426,62 @@ class PDF(FPDF, HTMLMixin):
         self.set_text_color(0, 0, 0)
         self.multi_cell(w=0, h=8.0, align='L', txt="Activeness score is a whole new measure of a user activity across thier github history. It rates users on a scale from 0-5, and takes into account a variety of things. These include the user's profile history like account age, followers, open-source projects etc. It also looks at all projects the user has contributed to as well as thier contributions in each project, including commits, activity timeline etc. These contributions and the activeness of given project are used for activeness score. The main advantage of activeness score is that the formula is dynamic, and takes into account the wider data distribution to give the user a good understanding on his activity" , border="")
         
-     def print_page(self, images):
-        # Generates the report
-        self.page_body(images)
+    def print_page(self):
+        self.page_body()
+
+    def driver(self,Reponame,Username,token):
+        analyser = Analyser(Reponame,Username) 
+        score = ActiveNess(Reponame,Username,token)
+
+        self.reponame = analyser.user + '/' + analyser.repo
+        self.username = analyser.getMainUser("user_complete_data.json")
+        self.repolink = "https://github.com/" + analyser.user + '/' + analyser.repo 
+        mainRepoData = analyser.getMainRepo()
+        self.repo_about = mainRepoData["description"]
+        self.repo_tags = mainRepoData["tagstring"] 
+        self.repo_doc = mainRepoData["created_at"].split('T')[0]
+        self.repo_contricount = str(mainRepoData["total_contributors"])
+        self.repo_lastcommitdate = mainRepoData["updated_at"].split('T')[0]
+        self.repo_openissuecount = str(mainRepoData['open_issues_count'])
+        self.repo_starscount = f"{mainRepoData['watchers_count']}"
+        self.repo_forkscount = f"{mainRepoData['forks_count']}"
+        self.repo_activescore = "{0:.2f}".format(score.Calculate_Score())
+        self.repo_languagepercent,self.repo_languagename = analyser.FileTypeAnalyser()
+
+        #new repo variables added on 08-01-2021
+
+        self.repo_cmin_commitperday,self.repo_cmax_commitperday = analyser.CommitsPerDayAvg()
+        self.repo_cmin_oscount,self.repo_cmax_oscount = analyser.OpenSourceProjectCount()
+        self.repo_cmin_publicrepocount,self.repo_cmax_publicrepocount = analyser.UserPublicRepoCount()
+        self.repo_cmin_accountage,self.repo_cmax_accountage = analyser.AccountAge()
+        self.repo_cmin_followers,self.repo_cmax_followers = analyser.FollowersCount()
+
+        self.repo_c_commitperday = "{0:.2f}".format( (float(self.repo_cmin_commitperday) + float(self.repo_cmax_commitperday)) / 2)
+
+
+        # language Data will give a tuple of above two list
+
+        self.user_activescore = "{0:.2f}".format(score.Calculate_Score("user_complete_data.json"))
+        self.user_languagepercent,self.user_languagename = analyser.FileTypeAnalyser("user_complete_data.json")
+
+        #new user variables added on 08-01-2021 
+
+        self.user_commitperday = (analyser.CommitsPerDayAvg("user_complete_data.json"))
+        self.user_oscount = (analyser.OpenSourceProjectCount("user_complete_data.json"))
+        self.user_publicrepocount = (analyser.UserPublicRepoCount("user_complete_data.json"))
+        self.user_accountage = (analyser.AccountAge("user_complete_data.json"))
+        self.user_followers = (analyser.FollowersCount("user_complete_data.json"))
+
+        analyser.ContributorsContributionGraph("user_complete_data.json")
+        analyser.ContributorsContributionGraph()
+        analyser.makeLanguageCharts("user_complete_data.json")
+        analyser.detailedGraph("user_complete_data.json")
+        analyser.ContributerTypeData()
+
+        self.print_page()  
+        self.output(f'report/{Reponame}_report.pdf', 'F')
 
 
 if __name__ == "__main__":
-
-    analyser = Analyser("food4all","krish7777") 
-    score = ActiveNess("food4all","krish7777","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")
-    score.Calculate_Score("user_complete_data.json")
-
-    images = ['contrichart.png' , 'language.png' , 'samplechart.png']
-    print(analyser.user + '/' + analyser.repo)
-    reponame = analyser.user + '/' + analyser.repo
-    username = analyser.getMainUser("user_complete_data.json")
-    repolink = "https://github.com/" + analyser.user + '/' + analyser.repo 
-    mainRepoData = analyser.getMainRepo()
-    repo_about = mainRepoData["description"]
-    repo_tags = mainRepoData["tagstring"] 
-    repo_doc = mainRepoData["created_at"].split('T')[0]
-    repo_contricount = str(mainRepoData["total_contributors"])
-    repo_lastcommitdate = mainRepoData["updated_at"].split('T')[0]
-    repo_openissuecount = str(mainRepoData['open_issues_count'])
-    repo_starscount = f"{mainRepoData['watchers_count']}"
-    repo_forkscount = f"{mainRepoData['forks_count']}"
-    print(repo_openissuecount,repo_starscount )
-    repo_activescore = "{0:.2f}".format(score.Calculate_Score())
-    repo_languagepercent,repo_languagename = analyser.FileTypeAnalyser()
-
-    #new repo variables added on 08-01-2021
-
-    repo_cmin_commitperday,repo_cmax_commitperday = analyser.CommitsPerDayAvg()
-    repo_cmin_oscount,repo_cmax_oscount = analyser.OpenSourceProjectCount()
-    repo_cmin_publicrepocount,repo_cmax_publicrepocount = analyser.UserPublicRepoCount()
-    repo_cmin_accountage,repo_cmax_accountage = analyser.AccountAge()
-    repo_cmin_followers,repo_cmax_followers = analyser.FollowersCount()
-
-    repo_c_commitperday = "{0:.2f}".format( (float(repo_cmin_commitperday) + float(repo_cmax_commitperday)) / 2)
-
-
-    # language Data will give a tuple of above two list
-
-    user_activescore = "{0:.2f}".format(score.Calculate_Score("user_complete_data.json"))
-    user_languagepercent,user_languagename = analyser.FileTypeAnalyser("user_complete_data.json")
-
-    #new user variables added on 08-01-2021 
-
-    user_commitperday = (analyser.CommitsPerDayAvg("user_complete_data.json"))
-    user_oscount = (analyser.OpenSourceProjectCount("user_complete_data.json"))
-    user_publicrepocount = (analyser.UserPublicRepoCount("user_complete_data.json"))
-    user_accountage = (analyser.AccountAge("user_complete_data.json"))
-    user_followers = (analyser.FollowersCount("user_complete_data.json"))
-
-    analyser.ContributorsContributionGraph("user_complete_data.json")
-    analyser.ContributorsContributionGraph()
-    analyser.makeLanguageCharts("user_complete_data.json")
-    analyser.detailedGraph("user_complete_data.json")
-    analyser.ContributerTypeData()
-
     pdf = PDF()
-    pdf.print_page(images)  
-    pdf.output('report/report.pdf', 'F')
+    pdf.driver("food4all","krish7777","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")

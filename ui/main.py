@@ -26,20 +26,17 @@ import re                       # for writing Regular Expressions
 from pprint import pprint
 
 from tool import RepoSummariser
+from pdfCreator import PDF
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append("../../atlastk")
 
-try:
-  import atlastk
-except:
-  import pip
-  pip.main(['install', 'atlastk'])
-  import atlastk
+
+import atlastk
+
 
 fields = []
 
-#obj = RepoSummariser("9ab3c7cf2a89afde31a4a30dec51c7bbaf2de1f8")
-#obj.rate_check()
+    
 
 def ac_connect(dom):
   dom.inner("", open( "Main.html").read() )
@@ -81,7 +78,16 @@ def checkuservalidity (token, username):
       return False
   else:
     return True
-      
+
+def driver(token,username,reponame):
+  
+  obj = RepoSummariser(token)
+  obj.initialise_repo(username,reponame)
+  obj.start_processing()
+
+  pdfCreator = PDF()
+  pdfCreator.driver(reponame,username,token)
+
 
 def ac_submit(dom):
   username = dom.get_value("username")
@@ -104,9 +110,8 @@ def ac_submit(dom):
   
   if valid_params:
     dom.alert("Submitted! The report once ready will be saved in Reports directory")
-    obj = RepoSummariser(token)
-    obj.initialise_repo(username,reponame)
-    obj.start_processing()
+    RepoOwner,RepoLocalName = reponame.split('/')
+    driver(token,RepoOwner,RepoLocalName)
     dom.set_value("token", "" )
     dom.set_value("username", "" )
     dom.set_value("reponame", "" )
@@ -126,3 +131,5 @@ callbacks = {
 }
     
 atlastk.launch(callbacks, None, open("Head.html").read())
+
+#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

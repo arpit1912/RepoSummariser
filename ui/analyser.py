@@ -61,7 +61,6 @@ class Analyser:
         days = ["Sat", "Fri", "Thur", "Wed", "Tues", "Mon", "Sun"]
         plt.yticks(np.arange(0.5, 7.5, step=1), days)
         plt.savefig(filename, dpi=600, bbox_inches='tight', pad_inches=0)
-        plt.show()
         plt.close()
         
     def LanguageChart(self,results, category_names, filename):
@@ -105,7 +104,6 @@ class Analyser:
         #plt.legend()
         plt.gca().legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.savefig(filename, dpi=600, bbox_inches='tight', pad_inches=0)
-        plt.show()
         plt.close()
     
     def ContributorsContributionGraph(self,filename = ""):

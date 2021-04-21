@@ -548,6 +548,6 @@ class RepoSummariser:
 
 if __name__ == "__main__":
     classObject = RepoSummariser("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")
-    classObject.rate_check()
+    #classObject.rate_check()
     classObject.initialise_repo("krish7777","food4all")
     classObject.start_processing()
