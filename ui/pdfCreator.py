@@ -422,8 +422,11 @@ class PDF(FPDF, HTMLMixin):
         self.set_font('Arial', 'B', 12)
         self.set_text_color(186, 80, 100)
         self.multi_cell(w=0, h=10.0, align='L', txt="Information about activeness score" , border="")
+        self.set_font('Arial', '', 10)
+        self.set_text_color(0, 0, 0)
+        self.multi_cell(w=0, h=8.0, align='L', txt="Activeness score is a whole new measure of a user activity across thier github history. It rates users on a scale from 0-5, and takes into account a variety of things. These include the user's profile history like account age, followers, open-source projects etc. It also looks at all projects the user has contributed to as well as thier contributions in each project, including commits, activity timeline etc. These contributions and the activeness of given project are used for activeness score. The main advantage of activeness score is that the formula is dynamic, and takes into account the wider data distribution to give the user a good understanding on his activity" , border="")
         
-    def print_page(self, images):
+     def print_page(self, images):
         # Generates the report
         self.page_body(images)
 
