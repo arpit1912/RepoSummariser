@@ -13,14 +13,28 @@ import random
 from analyser import Analyser
 from tool import RepoSummariser
 
+"""
+This class is responsible for calculating the activeness of the Repo and the User
+It uses some set of rules defined by the code owners to generate a score rating out
+of 5 for both user and the Repo
+
+As this Class is an extension of Analyser and uses some of the RepoSummariser, it inherits both
+of the classes.
+"""
 class ActiveNess(Analyser, RepoSummariser):
     
     def __init__(self,repo,user,token):
+    """
+    The ActiveNess init also initialse the Super classes on which it is dependent
+    """
         Analyser.__init__(self,repo,user)
         RepoSummariser.__init__(self,token)
         self.initialise_repo(user,repo)
     
     def OSS_score(self,value,avg_range):
+    """
+    The function give the Open Source project score
+    """
         MIN,MAX = avg_range
         MIN = float(MIN)
         MAX = float(MAX)
@@ -34,6 +48,9 @@ class ActiveNess(Analyser, RepoSummariser):
             return 0.45
     
     def PublicRepoCount_score(self,value,avg_range):
+    """
+    The function give the Public Repo count score
+    """
         MIN,MAX = avg_range
         MIN = float(MIN)
         MAX = float(MAX)
@@ -48,6 +65,9 @@ class ActiveNess(Analyser, RepoSummariser):
             return 0.45
         
     def Commit_score(self,value,avg_range):
+    """
+    The function give the Commit score
+    """
         MIN,MAX = avg_range
         MIN = float(MIN)
         MAX = float(MAX)
@@ -62,6 +82,9 @@ class ActiveNess(Analyser, RepoSummariser):
             return 1
     
     def Age_score(self,value,avg_range):
+    """
+    The function give the Age score
+    """
         MIN,MAX = avg_range
         MIN = float(MIN)
         MAX = float(MAX)
@@ -74,6 +97,9 @@ class ActiveNess(Analyser, RepoSummariser):
             return 0.2
     
     def Follower_score(self,value,avg_range):
+    """
+    The function give the Follower score
+    """
         MIN,MAX = avg_range
         MIN = float(MIN)
         MAX = float(MAX)        
@@ -85,14 +111,18 @@ class ActiveNess(Analyser, RepoSummariser):
             return 0.25
     
     def Organisation_score(self,HasOrganisation):
-
+    """
+    The function to give the Organisation score
+    """
         if HasOrganisation is True:
             return 0.15
         else:
             return 0
     
     def UserCommitCountRatio_score(self,ratio):
-        
+    """
+    The function to give the User Commit Count Ratio score
+    """
         if ratio < 0.2:
             return 0.2
         elif ratio < 0.4:
@@ -113,7 +143,9 @@ class ActiveNess(Analyser, RepoSummariser):
             return 1.35
         
     def UserAgeRatio_score(self,ratio):
-        
+    """
+    The function to give the User Age Ratio score
+    """
         if ratio < 0.2:
             return 0.1
         elif ratio < 0.4:
@@ -126,37 +158,55 @@ class ActiveNess(Analyser, RepoSummariser):
             return 0.3
       
     def Wiki_score(self,HasWiki):
+    """
+    The function to give the Wiki of the Repo a score
+    """
         if HasWiki is True:
             return 0.2
         else:
             return 0
     
     def OpenIssues_score(self,count):
-        
+    """
+    The function to give the Open issuees in the project a score
+    """
         if count < 50:
             return 0.1
         else:
             return 0.2
     
     def Fork_score(self,count):
+    """
+    The function to give the Fork count in the project a score
+    """
         if count < 50:
             return 0.05
         else:
             return 0.1
     
     def Watchers_score(self,count):
+    """
+    The function to give the Watcher count in the project a score
+    """
         if count < 50:
             return 0.05
         else:
             return 0.1
 
     def Tags_score(self,HasTags):
+    """
+    The function to give the Tags of the project a score
+    """
         if HasTags is True:
             return 0.15
         else:
             return 0
     
     def Calculate_Score(self,filename = ""):
+    """
+    This function calculate the Activeness Score after extracting
+    the analytic data from the Analytics class and the above functions
+    """
         
         ContributorData = self.getFileData(filename)
         
@@ -234,8 +284,4 @@ class ActiveNess(Analyser, RepoSummariser):
         print(statistics.mean( userScores))
 
         return statistics.mean(userScores)
-        
-            
-if __name__ == "__main__":
-    score = ActiveNess("food4all","krish7777","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")
-    score.Calculate_Score("user_complete_data.json")
+

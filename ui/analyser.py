@@ -11,24 +11,41 @@ from datetime import datetime
 import os
 import random
 
-    
+"""
+Analyser class is used to process the structured data extracted by the
+RepoSummariser class, this class calculate the analytic details and also 
+create the chart images need for the report.
+
+Note: the activeness score is refactored into a separe class known as
+actiness now as it was making the Analyser too big to handle. 
+"""
 class Analyser:
     
     def __init__(self,repo,user):
+    """
+    The init function need repo and user name 
+    For example -> "Food4all" as repo and "krish777" will be a valid entry for krish777/Food4all
+    """
         self.repo = repo
         self.user = user
         self.repofile = f'{repo}_users_repo_complete_data.json'
         print(self.repo,self.user,self.repofile)
     
     def getMainUser(self,filename):
-        
+    """
+    This function give the login details of the users stored in the files
+    The main intent of this function is to get the login details of the token owner
+    """    
         userData = self.getFileData(filename)
         
         for userdetails in userData.values():
             return userdetails['login']
     
     def getMainRepo(self):
-        
+    """
+    This function returns the data stored about the main repo which we want to analyse
+    Also it converts the array of tags into a single representable string.
+    """    
         userData = self.getFileData(f"{self.repo}_main_data.json")
         
         userData["tagstring"] = ""
@@ -43,6 +60,11 @@ class Analyser:
         return userData
     
     def getFileData(self,filename = ""):
+    """
+    This function extract the data stored in the file
+    The default behaviour is to extract the main file but it can be changed by passing
+    filename
+    """
         RepoData = {}
         if filename == "":
             with open(f"data/{self.repofile}",) as inpFile:
@@ -54,6 +76,9 @@ class Analyser:
             return RepoData
     
     def ContributorsChart(self,Z, filename):
+    """
+    This function create a contributor chart with the name as "filename"
+    """
         plt.figure(figsize=(20,3))
         plt.pcolormesh(Z, cmap='YlGn')
         plt.title('Contribution chart', fontweight ="bold")
@@ -64,6 +89,9 @@ class Analyser:
         plt.close()
         
     def LanguageChart(self,results, category_names, filename):
+    """
+    This function create a Language Chart with the name as "filename"
+    """
         labels = list(results.keys())
         data = np.array(list(results.values()))
         data_cum = data.cumsum(axis=1)
@@ -94,6 +122,9 @@ class Analyser:
         return fig, ax
     
     def SplitChart (self,category_names, min_values, max_values, mean_values, xlabel, ylabel, filename):
+    """
+    This function create a Split chart with the name as "filename"
+    """
         plt.grid(color='#F2F2F2', alpha=1, zorder=0)
         plt.plot(category_names, max_values, label = "Maximal average")
         plt.plot(category_names, min_values, label = "Minimal average")
@@ -107,6 +138,9 @@ class Analyser:
         plt.close()
     
     def ContributorsContributionGraph(self,filename = ""):
+    """
+    This function process the data and create the contribution chart for an year
+    """
         np_contribution_data = []
         repoData = {}
         if filename == "":
@@ -148,6 +182,9 @@ class Analyser:
             self.ContributorsChart(avg_data,"images/usercontrichart")
     
     def languageData(self):
+    """
+    This function give the language logistics from the data
+    """
         repoData = self.getFileData(f"{self.repo}_main_data.json")
         
         repo_languages = repoData['languages']
@@ -166,7 +203,11 @@ class Analyser:
         
         
     def ContributerTypeData(self):
-        
+    """
+    This function give the Contributer type logistics from the data
+    In our convention, we have four type of contributors namely,
+    Professional, Enterprise, User, Organisation
+    """    
         data = self.getFileData()
         userTypeDict = {}
         userList = []
@@ -195,7 +236,9 @@ class Analyser:
         return userTypeList, userList        
      
     def CommitsPerDayAvg(self,filename = ""):
-        
+    """
+    This function give the commit per Day logistics from the data
+    """    
         repoData = {}
         if filename == "":
             repoData = self.getFileData()
@@ -229,7 +272,9 @@ class Analyser:
         return "{0:.2f}".format(lower_limit), "{0:.2f}".format(upper_limit)
     
     def OpenSourceProjectCount(self,filename = ""):
-        
+    """
+    This function give the Open Source Project Count logistics from the data
+    """    
         repoData = {}
         if filename == "":
             repoData = self.getFileData()
@@ -257,7 +302,9 @@ class Analyser:
         return "{0:.2f}".format(lower_limit), "{0:.2f}".format(upper_limit)
     
     def UserPublicRepoCount(self,filename = ""):
-        
+    """
+    This function give the User Public Repo Count logistics from the data
+    """    
         repoData = {}
         if filename == "":
             repoData = self.getFileData()
@@ -285,6 +332,9 @@ class Analyser:
         return "{0:.2f}".format(lower_limit), "{0:.2f}".format(upper_limit)        
      
     def AccountAge(self,filename = ""):
+    """
+    This function give the Account Age logistics from the data
+    """
         repoData = {}
         if filename == "":
             repoData = self.getFileData()
@@ -313,6 +363,9 @@ class Analyser:
         return "{0:.2f}".format(lower_limit), "{0:.2f}".format(upper_limit)
     
     def FollowersCount(self,filename = ""):
+    """
+    This function give the Follower Count logistics from the data
+    """
         repoData = {}
         if filename == "":
             repoData = self.getFileData()
@@ -338,11 +391,16 @@ class Analyser:
         return "{0:.2f}".format(lower_limit), "{0:.2f}".format(upper_limit)
          
     def getExtension(self,path):
+    """
+    This function returns the file extension using it's path
+    """
         filename, file_extension = os.path.splitext(path)
         return file_extension
     
     def TypeClassfier(self,extension):
-        
+    """
+    This function classify the extension based on some standard types
+    """    
         if extension == '.ts':
             return "typescript"
         elif extension == '.md' or extension == '.txt':
@@ -365,6 +423,9 @@ class Analyser:
             return "others"
     
     def sorted_lists(self, list1, list2):
+    """
+    This function sort the list1 and list2 based on the entry of list1
+    """
         zipped_lists = zip(list1, list2)
         sorted_pairs = sorted(zipped_lists)
 
@@ -379,6 +440,10 @@ class Analyser:
         return list1,list2
     
     def FileTypeAnalyser(self,filename = ""):
+    """
+    This function Analyse the Files committed by the user's and return the top 5 
+    Language in which he/she has worked along with their percent
+    """
         repoData = {}
         if filename == "":
             repoData = self.getFileData()
@@ -440,7 +505,9 @@ class Analyser:
         return self.sorted_lists(filePercentList,fileNameList)
         
     def makeLanguageCharts(self,filename):
-        
+    """
+    This function make all the Language charts required for the report
+    """    
         userData = self.getFileData(filename)
         userName = ""
         for key in userData.keys():
@@ -463,7 +530,10 @@ class Analyser:
         
     
     def detailedGraph(self,filename):
-        
+    """
+    This function create a split chart by using the commit per day, open source projects,
+    public repos, account age and followers data
+    """    
         category_names = ['Commits per day', 'Open source projects',
                     'Public repositories', 'Account age', 'Followers']
         min_values = []
@@ -506,58 +576,3 @@ class Analyser:
         print("values are: \n")
         print(min_values,max_values,user_values)
         self.SplitChart(category_names, min_values, max_values, user_values, "Languages", "Usage", "images/samplechart")
-
-if __name__ == "__main__":
-    analyser = Analyser("food4all","krish7777")       
-    print(analyser.user + '/' + analyser.repo)
-    reponame = analyser.user + '/' + analyser.repo
-    username = analyser.getMainUser("user_complete_data.json")
-    repolink = "https://github.com/" + analyser.user + '/' + analyser.repo 
-    mainRepoData = analyser.getMainRepo()
-    repo_about = mainRepoData["description"]
-    repo_tags = mainRepoData["tagstring"] 
-    repo_doc = mainRepoData["created_at"].split('T')[0]
-    repo_contricount = str(mainRepoData["total_contributors"])
-    repo_lastcommitdate = mainRepoData["updated_at"].split('T')[0]
-    repo_openissuecount = str(mainRepoData['open_issues_count'])
-    repo_starscount = f"{mainRepoData['watchers_count']}"
-    repo_forkscount = f"{mainRepoData['forks_count']}"
-    print(repo_openissuecount,repo_starscount )
-    repo_activescore = "3.5"
-    repo_languagepercent,repo_languagename = analyser.FileTypeAnalyser()
-
-    #new repo variables added on 08-01-2021
-
-    repo_cmin_commitperday,repo_cmax_commitperday = analyser.CommitsPerDayAvg()
-    repo_cmin_oscount,repo_cmax_oscount = analyser.OpenSourceProjectCount()
-    repo_cmin_publicrepocount,repo_cmax_publicrepocount = analyser.UserPublicRepoCount()
-    repo_cmin_accountage,repo_cmax_accountage = analyser.AccountAge()
-    repo_cmin_followers,repo_cmax_followers = analyser.FollowersCount()
-
-    repo_c_commitperday = "{0:.2f}".format( (float(repo_cmin_commitperday) + float(repo_cmax_commitperday)) / 2)
-
-
-    # language Data will give a tuple of above two list
-
-    user_activescore = "2.5"
-    user_languagepercent,user_languagename = analyser.FileTypeAnalyser("user_complete_data.json")
-
-    #new user variables added on 08-01-2021 
-
-    print("\nuser's data here\n")
-
-    user_commitperday = (analyser.CommitsPerDayAvg("user_complete_data.json"))
-    user_oscount = (analyser.OpenSourceProjectCount("user_complete_data.json"))
-    user_publicrepocount = (analyser.UserPublicRepoCount("user_complete_data.json"))
-    user_accountage = (analyser.AccountAge("user_complete_data.json"))
-    user_followers = (analyser.FollowersCount("user_complete_data.json"))
-
-
-    analyser.ContributorsContributionGraph("user_complete_data.json")
-    analyser.ContributorsContributionGraph()
-
-    analyser.makeLanguageCharts("user_complete_data.json")
-    analyser.detailedGraph("user_complete_data.json")
-
-
-    analyser.ContributerTypeData()
