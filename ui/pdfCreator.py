@@ -15,62 +15,73 @@ from analyser import Analyser
 from tool import RepoSummariser
 from activeness import ActiveNess
 
+'''
+Class to create the final PDF report using PyFPDF python library. Takes all the data analytics and charts generated and generates a pdf report of the same.
+NOTE: PDF generated is stored in report directory
+'''
 class PDF(FPDF, HTMLMixin):
     def __init__(self):
+        '''
+        Constructor; allows setting up the page format, the orientation and the unit of measurement used in all methods
+        '''    
         super().__init__()
         self.WIDTH = 210
         self.HEIGHT = 297
         
     def lines(self):
+        '''
+        Method to add a border around the page by drawing a rectangle with coordinates specified
+        '''    
         self.rect(5.0, 5.0, 200.0,287.0)
         
     def header(self):
-        # Custom logo and positioning
-        # Create an `assets` folder and put any wide and short image inside
-        # Name the image `logo.png`
-        #self.image('assets/logo.png', 10, 8, 33)
+        '''
+        Method to render the page header. It is automatically called when a new page is added by method add_page()
+        '''
+        #set font, font formatting and size
         self.set_font('Arial', 'B', 11)
+        #add header text, aligned to right
         self.cell(self.WIDTH - 80)
         self.cell(60, 1, 'RepoSummariser', 0, 0, 'R')
+        #line break
         self.ln(20)
         
     def footer(self):
+        '''
+        Method to render the page footer. It is automatically called when a new page is added by method add_page()
+        '''
         # Page numbers in the footer
+        #set y position where footer is to be added
         self.set_y(-15)
+        #set text formatting
         self.set_font('Arial', 'I', 8)
         self.set_text_color(128)
+        #add page number in centre of footer
         self.cell(0, 10, 'Page ' + str(self.page_no()), 0, 0, 'C')
 
     def page_body(self):
-        # Determine how many plots there are per page and set positions
-        # and margins accordingly
         '''
-        if len(images) == 3:
-            self.image(images[0], 15, 25, self.WIDTH - 30)
-            self.image(images[1], 15, self.WIDTH / 2 + 5, self.WIDTH - 30)
-            self.image(images[2], 15, self.WIDTH / 2 + 90, self.WIDTH - 30)
-        elif len(images) == 2:
-            self.image(images[0], 15, 25, self.WIDTH - 30)
-            self.image(images[1], 15, self.WIDTH / 2 + 5, self.WIDTH - 30)
-        else:
-            self.image(images[0], 15, 25, self.WIDTH - 30)
-        
+        Method to render the page body. This is where the entire report is created
         '''
+        #page 1 : title page, includes general details about the repository
         self.add_page()
         self.lines()
-        #page 1 : general main repo stats, user stats
         
+        #page title
         self.set_xy(10.0,17.0)
         self.set_font('Arial', 'B', 18)
         self.set_text_color(186, 80, 100)
-        #self.write_html("Analysis of repository + <b> reponame </b>")
         self.multi_cell(w=0, h=14.0, align='C', txt="Analysis of repository "+  self.reponame  + " and userID " + self.username, border="")
         
+        #Subtitle: repository name
         self.set_xy(10.0,self.get_y() + 2)
         self.set_font('Arial', 'B', 16)
         self.set_text_color(186, 80, 100)
         self.cell(w=0.0, h=10.0, align='L', txt= self.reponame + " details" , border="T", link=self.repolink)
         
+        #repository details printed from here
+
+        #About the repository
         self.set_xy(14.0,self.get_y()+10)
         self.set_font('Arial', 'B', 14)
         self.set_text_color(0, 0, 0)
@@ -80,6 +91,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_font('Arial', '', 14)
         self.multi_cell(w=0.0, h=9.0, align='L', txt= self.repo_about, border=0)
         
+        #repository tags
         self.set_xy(14, self.get_y())
         self.set_font('Arial', 'B', 14)
         self.cell(w=32.0, h=9.0, align='L', txt= "Project tags: ", border=0)
@@ -88,6 +100,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_font('Arial', '', 14)
         self.multi_cell(w=0.0, h=9.0, align='L', txt= self.repo_tags, border=0)
         
+        #repository stats
         self.set_xy(14.0,self.get_y())
         self.set_font('Arial', 'B', 14)
         self.multi_cell(w=0.0, h=8.0, align='L', txt= "Project stats: ", border=0)
@@ -102,33 +115,33 @@ class PDF(FPDF, HTMLMixin):
                         "Stars: " + self.repo_starscount + "\n" +
                         "Open issues: " + self.repo_openissuecount + "\n", border=0)
         
-        #repository language split
+        #repository language split chart
         self.set_xy(14.0,self.get_y()+5)
         self.set_font('Arial', 'B', 14)
         self.set_text_color(0, 0, 0)
         self.multi_cell(w=0.0, h=9.0, align='L', txt= "Languages: \n", border=0)
         self.image('images/language.png', 18.0, self.get_y() + 2.0, self.WIDTH - 40, 15)
         
-        #types of contributors accounts
+        #types of contributors chart
         self.set_xy(14.0,self.get_y() + 25)
         self.set_font('Arial', 'B', 14)
         self.set_text_color(0, 0, 0)
         self.multi_cell(w=0.0, h=9.0, align='L', txt= "Contributor account types: \n", border=0)
         self.image('images/ContributorType.png', 18.0, self.get_y() + 2.0, self.WIDTH - 40, 15)
         
+        #end of page 1
         
-        
-        #page 2 : report start with activeness score user and repo, contine
-        #decide what text stas to add, charts etc
-        
+        #page 2 : contains activeness score, comparison between contributors and user
         self.add_page()
         self.lines()
         
+        #page 2 title
         self.set_xy(10.0,15.0)
         self.set_font('Arial', 'B', 22)
         self.set_text_color(186, 80, 100)
         self.cell(w=0, h=15.0, align='C', txt="Analysis report", border="B")
         
+        #page 2 subtitle: Activeness score
         self.set_xy(10.0,45.0)
         self.set_font('Arial', 'B', 20)
         self.cell(w=0.0, h=0.0, align='L', txt= "Activeness score:" , border=0)
@@ -141,13 +154,16 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(76.0,49.0)
         self.cell(w=0.0, h=0.0, align='L', txt= self.reponame + " contributors (avg): " + self.repo_activescore, border=0)
         
+        #page 2 subtitle: Detailed comparison
         self.set_xy(10.0,self.get_y() + 15)
         self.set_font('Arial', 'B', 20)
         self.set_text_color(186, 80, 100)
         self.cell(w=0.0, h=0.0, align='L', txt= "Detailed comparison:" , border=0)
         
         height_y = self.get_y()+12
-        
+        #Comparison table plotting begins here
+
+        #Table headings
         self.set_xy(55.0,height_y)
         self.set_font('Arial', 'B', 10)
         self.set_text_color(0, 0, 0)
@@ -161,7 +177,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(145.0,height_y)
         self.multi_cell(w=55.0, h=7.0, align='C', txt= self.reponame + " contributors maximal average", border="L")
         
-        #commits per day
+        #Comparison parameter 1: commits per day
         height_y = self.get_y()
         
         self.set_xy(5.0,height_y)
@@ -180,7 +196,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(145.0,height_y)
         self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_commitperday, border="L")
         
-        #Open source projects contributed to
+        #Comparison parameter 2: Open source projects contributed to
         height_y = self.get_y()
         
         self.set_xy(5.0,height_y)
@@ -199,7 +215,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(145.0,height_y)
         self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_oscount, border="L")
         
-        #Public repositories
+        #Comparison parameter 3: Public repositories
         height_y = self.get_y()
         
         self.set_xy(5.0,height_y)
@@ -218,7 +234,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(145.0,height_y)
         self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_publicrepocount, border="L")
         
-        #Account age
+        #Comparison parameter 4: Account age
         height_y = self.get_y()
         
         self.set_xy(5.0,height_y)
@@ -237,7 +253,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(145.0,height_y)
         self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_accountage, border="L")
         
-        #Followers
+        #Comparison parameter 5: Followers
         height_y = self.get_y()
         
         self.set_xy(5.0,height_y)
@@ -256,32 +272,35 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(145.0,height_y)
         self.multi_cell(w=55.0, h=9.0, align='C', txt= self.repo_cmax_followers, border="L")
         
-        #add more if needed
-        #chart plotting these parametera
+        #Plotting a chart comparing these parametera
         
         self.image('images/samplechart.png', 12.0, self.get_y() + 10.0, self.WIDTH - 20)
         
-        self.set_xy(10.0,265)
+        self.set_xy(10.0,270)
         self.set_font('Arial', 'I', 8)
         self.set_text_color(186, 80, 100)
         self.multi_cell(w=0.0, h=8.0, align='L', txt= "*Minimal average corresponds to (mean - std dev) while maximal average corresponds to (mean + std dev). 68% of contributors lie within this range", border="")
         
-        #page 3 : language split and avg contribution chart
-        
+        #page 2 ends here
+
+        #page 3 : language usage split
         self.add_page()
         self.lines()
-        
+        #page 3 title: Language usage
         self.set_xy(10.0,15.0)
         self.set_font('Arial', 'B', 20)
         self.set_text_color(186, 80, 100)
         self.cell(w=0, h=15.0, align='L', txt="Language usage", border="B")
         
+        #language preference table plots here
+        #table title
         height_y = self.get_y() + 20
         self.set_xy(15.0,height_y)
         self.set_font('Arial', 'B', 16)
         self.cell(w=0, h=10.0, align='C', txt="Top 5 preferred languages", border="B")
         height_y = self.get_y() + 15
         
+        #column headings
         self.set_xy(10.0,height_y)
         self.set_font('Arial', 'B', 12)
         self.set_text_color(0, 0, 0)
@@ -295,7 +314,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(115.0,height_y)
         self.multi_cell(w=80.0, h=9.0, align='C', txt= self.reponame + " contributors (average)", border="LR")
         
-        #language 1
+        #First row: language 1
         height_y = self.get_y()
         self.set_xy(10.0,height_y)
         self.set_font('Arial', 'B', 12)
@@ -310,7 +329,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(115.0,height_y)
         self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[0] + " - "+ self.repo_languagepercent[0], border="LR")
         
-        #language 2
+        #Second row: language 2
         height_y = self.get_y()
         self.set_xy(10.0,height_y)
         self.set_font('Arial', 'B', 12)
@@ -325,7 +344,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(115.0,height_y)
         self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[1] + " - "+ self.repo_languagepercent[1], border="LR")
         
-        #language 3
+        #Third row: language 3
         height_y = self.get_y()
         self.set_xy(10.0,height_y)
         self.set_font('Arial', 'B', 12)
@@ -340,7 +359,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(115.0,height_y)
         self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[2] + " - "+ self.repo_languagepercent[2], border="LR")
         
-        #language 4
+        #Fourth row: language 4
         height_y = self.get_y()
         self.set_xy(10.0,height_y)
         self.set_font('Arial', 'B', 12)
@@ -355,7 +374,7 @@ class PDF(FPDF, HTMLMixin):
         self.set_xy(115.0,height_y)
         self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[3] + " - "+ self.repo_languagepercent[3], border="LR")
         
-        #language 5
+        #Fifth row: language 5
         height_y = self.get_y()
         self.set_xy(10.0,height_y)
         self.set_font('Arial', 'B', 12)
@@ -369,7 +388,8 @@ class PDF(FPDF, HTMLMixin):
             
         self.set_xy(115.0,height_y)
         self.multi_cell(w=80.0, h=9.0, align='C', txt= self.repo_languagename[4] + " - "+ self.repo_languagepercent[4], border="LR")
-        
+        #table ends
+
         #user language chart
         self.set_xy(14.0,self.get_y()+10)
         self.set_font('Arial', 'B', 14)
@@ -388,19 +408,19 @@ class PDF(FPDF, HTMLMixin):
         self.set_font('Arial', 'I', 10)
         self.set_text_color(186, 80, 100)
         self.multi_cell(w=0.0, h=8.0, align='L', txt= "*Others includes all languages excluding C, C++, JAVA, Python, JS, markdown, text, HTML, typescript and css", border="")
+        #page 3 ends
         
-        
-        #page 4 : language split and avg contribution chart
+        #page 4 : Average contribution data
         
         self.add_page()
         self.lines()
-        
+        #page 4 title: Past year contributions
         self.set_xy(10.0,15.0)
         self.set_font('Arial', 'B', 20)
         self.set_text_color(186, 80, 100)
         self.cell(w=0, h=15.0, align='L', txt="Past year contributions", border="B")
         
-        #user daily contribution
+        #user average daily contribution
         height_y = self.get_y() + 20
         self.set_xy(15.0,height_y)
         self.set_font('Arial', 'B', 15)
@@ -409,6 +429,7 @@ class PDF(FPDF, HTMLMixin):
         
         self.image('images/usercontrichart.png', 18.0, self.get_y() + 2.0, self.WIDTH - 40)
         
+        #repo contributors average daily contribution
         height_y = self.get_y() + 40
         self.set_xy(15.0,height_y)
         self.set_font('Arial', 'B', 15)
@@ -417,19 +438,29 @@ class PDF(FPDF, HTMLMixin):
         
         self.image('images/contrichart.png', 18.0, self.get_y() + 2.0, self.WIDTH - 40)
         
+        #Information about activeness score
         height_y = self.get_y() + 40
         self.set_xy(15.0,height_y)
         self.set_font('Arial', 'B', 12)
         self.set_text_color(186, 80, 100)
         self.multi_cell(w=0, h=10.0, align='L', txt="Information about activeness score" , border="")
-        self.set_font('Arial', '', 10)
+        self.set_font('Arial', '', 9)
         self.set_text_color(0, 0, 0)
+        self.set_xy(15.0,self.get_y())
         self.multi_cell(w=0, h=8.0, align='L', txt="Activeness score is a whole new measure of a user activity across thier github history. It rates users on a scale from 0-5, and takes into account a variety of things. These include the user's profile history like account age, followers, open-source projects etc. It also looks at all projects the user has contributed to as well as thier contributions in each project, including commits, activity timeline etc. These contributions and the activeness of given project are used for activeness score. The main advantage of activeness score is that the formula is dynamic, and takes into account the wider data distribution to give the user a good understanding on his activity" , border="")
-        
+        #page 4 ends
+
+
     def print_page(self):
+        '''
+        method to print the pages of report
+        '''
         self.page_body()
 
     def driver(self,Reponame,Username,token):
+        '''
+        driver function to get data to generate report
+        '''
         analyser = Analyser(Reponame,Username) 
         score = ActiveNess(Reponame,Username,token)
 

@@ -15,26 +15,23 @@ structural formatting which is later on used by the Analyser and Actiness class 
 class RepoSummariser:
     
     def __init__(self,token):
-    """
-    The init will take an active token of a user
-    """
-
+        """
+        The init will take an active token of a user
+        """
         self.token = token
         self.g = Github(token)
     
     def initialise_repo(self,owner,repo):
-    """
-    initialise the owner and the repo name through this function
-    """
-
+        """
+        initialise the owner and the repo name through this function
+        """
         self.owner = owner
         self.repo = repo
     
     def get_contributors_list(self):
-    """
-    this Function give the Contributor list of the given repo
-    """
-
+        """
+        this Function give the Contributor list of the given repo
+        """
         query_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/contributors?page=1&per_page=10000"
         params = {
                 "state": "open",
@@ -58,10 +55,9 @@ class RepoSummariser:
             json.dump(data,outfile)
 
     def get_contributor_login(self):
-    """
-    Find the login details of the contributors
-    """
-
+        """
+        Find the login details of the contributors
+        """
         contributor_list = []
         with open(f"data/{self.repo}_contributors.json",) as inpFile:
             contributor_list = json.load(inpFile)
@@ -88,10 +84,9 @@ class RepoSummariser:
             json.dump(data,outfile)
     
     def get_all_user_repos(self):
-    """
-    Get all the Repo on which the user works using the login details
-    """
-    
+        """
+        Get all the Repo on which the user works using the login details
+        """
         user_names = []
         with open(f"data/{self.repo}_all_users.json",) as inpFile:
             user_names = json.load(inpFile)['users']
@@ -112,10 +107,9 @@ class RepoSummariser:
             json.dump(data,outfile)
     
     def repo_details(self,owner,repo):
-    """ 
-    Fetch a more elaborate detail of the Repo
-    """
-
+        """ 
+        Fetch a more elaborate detail of the Repo
+        """
         query_url = f"https://api.github.com/repos/{owner}/{repo}"
         params = {
             "state": "open",
@@ -129,8 +123,9 @@ class RepoSummariser:
         return r.json()            
     
     def calculated_contribution(self,owner,main_repo):
-        """  calcuate the contribution of a user in the Repo """
-
+        """ 
+        calcuate the contribution of a user in the Repo
+        """
         contributor_list = []
         with open(f"data/{main_repo}_contributors.json",) as inpFile:
             contributor_list = json.load(inpFile)
@@ -147,9 +142,9 @@ class RepoSummariser:
         return total_contributions, user_contribution
     
     def filter_valid_repos(self):
-    """ 
-    filter the repo based on the user contribution 
-    """
+        """ 
+        filter the repo based on the user contribution 
+        """
     
         user_repos = []
         with open(f"data/{self.repo}_all_users_repo.json",) as inpFile:
@@ -188,10 +183,9 @@ class RepoSummariser:
             json.dump(data,outfile,indent = 4)   
     
     def get_repo_commits(self):
-    """
-    Find the commits in a repo 
-    """
-    
+        """
+        Find the commits in a repo 
+        """
         repos = []
         with open(f"data/{self.repo}_all_users_filtered_repo.json",) as inpFile:
             repos = json.load(inpFile)
@@ -228,10 +222,9 @@ class RepoSummariser:
             json.dump(DATA,outfile,indent=4)
     
     def filtered_commits(self):
-    """ 
-    store only the relavant commits which are usefull to us
-    """
-    
+        """ 
+        store only the relavant commits which are usefull to us
+        """
         data = {}
         print(f"data/{self.repo}_users_repo_commits.json")
         with open(f"data/{self.repo}_users_repo_commits.json",) as inpFile:
@@ -257,10 +250,9 @@ class RepoSummariser:
             json.dump(new_data,outfile,indent=4)
     
     def commit_sha_exploration(self):
-    """ 
-    Fetch the data from the filtered commit details 
-    """
-    
+        """ 
+        Fetch the data from the filtered commit details 
+        """
         data = {}
         with open(f"data/{self.repo}_users_repo_sha_usefull_commits.json",) as Inpfile:
             data = json.load(Inpfile)
@@ -332,9 +324,9 @@ class RepoSummariser:
             json.dump(user_data,outfile,indent=4)
 
     def rate_check(self):
-    """ 
-    To check the number of request left for the given token 
-    """
+        """ 
+        To check the number of request left for the given token 
+        """
 
         query_url = f"https://api.github.com/rate_limit"
         print(query_url)
@@ -343,9 +335,9 @@ class RepoSummariser:
         pprint(r.json())
 
     def get_user_last_year_commits(self,user):
-    """
-    To get the last year commit by the 'user'
-    """
+        """
+        To get the last year commit by the 'user'
+        """
         headers = {'Authorization': f'token {self.token}'}
         query = """
         {{
@@ -379,9 +371,9 @@ class RepoSummariser:
         return request.json()
 
     def repo_graph_details(self,owner,name):
-    """
-    To get the Repository Topics with the given 'name' and 'owner'
-    """    
+        """
+        To get the Repository Topics with the given 'name' and 'owner'
+        """    
         headers = {'Authorization': f'token {self.token}'}
         query ="""
         {{
@@ -415,9 +407,9 @@ class RepoSummariser:
             json.dump(request.json(),outfile,indent=4)
     
     def user_analytic_details(self,user):
-    """
-    To get the details related to the 'user'
-    """    
+        """
+        To get the details related to the 'user'
+        """    
         query_url = f"https://api.github.com/users/{user}"
         params = {
             "state": "open",
@@ -436,9 +428,9 @@ class RepoSummariser:
         return data
     
     def repo_languages(self,owner,repo):
-    """
-    To get the Repo Language for the given 'repo' and 'owner'
-    """   
+        """
+        To get the Repo Language for the given 'repo' and 'owner'
+        """   
         query_url = f"https://api.github.com/repos/{owner}/{repo}/languages"
         params = {
             "state": "open",
@@ -450,9 +442,9 @@ class RepoSummariser:
         return data
 
     def main_repo_details(self):
-    """
-    To extract the details of the main repo which we have to analyse
-    """
+        """
+        To extract the details of the main repo which we have to analyse
+        """
         self.repo_details(self.owner,self.repo)   
 
         repo_data = []
@@ -492,11 +484,11 @@ class RepoSummariser:
         return repo_processed_data
 
     def repo_analysis_details(self):
-    """
-    This function store all the data collected in earlier function to a structured format for
-    easier access, it stores the data into two file one for the main user who own's the token
-    and one for the contributors of the given repo
-    """
+        """
+        This function store all the data collected in earlier function to a structured format for
+        easier access, it stores the data into two file one for the main user who own's the token
+        and one for the contributors of the given repo
+        """
         repos_details = []
         with open(f"data/{self.repo}_all_users_filtered_repo.json",) as inpFile:
             repos_details = json.load(inpFile)
@@ -573,9 +565,9 @@ class RepoSummariser:
             json.dump(main_user_data,outfile,indent=4)
    
     def start_processing(self):
-    """ 
-    Driving function to run the extraction process 
-    """
+        """ 
+        Driving function to run the extraction process 
+        """
 
         print( "Starting the Data Extraction Process")
         self.get_contributors_list()
