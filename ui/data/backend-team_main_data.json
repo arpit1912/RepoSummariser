@@ -1,0 +1,17 @@
+{
+    "created_at": "2020-05-31T06:43:41Z",
+    "updated_at": "2020-10-18T06:12:36Z",
+    "description": "All the back-end work can be found here",
+    "size": 1655,
+    "has_wiki": true,
+    "open_issues_count": 1,
+    "watchers_count": 1,
+    "forks_count": 0,
+    "tags": [],
+    "total_contributors": 6,
+    "total_commits": 789,
+    "languages": {
+        "HTML": 247582,
+        "JavaScript": 134014
+    }
+}

@@ -92,8 +92,8 @@
     "watchers": 0,
     "default_branch": "main",
     "permissions": {
-        "admin": false,
-        "push": false,
+        "admin": true,
+        "push": true,
         "pull": true
     },
     "temp_clone_token": "",
