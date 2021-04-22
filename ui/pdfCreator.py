@@ -21,23 +21,23 @@ NOTE: PDF generated is stored in report directory
 '''
 class PDF(FPDF, HTMLMixin):
     def __init__(self):
-    '''
-    Constructor; allows setting up the page format, the orientation and the unit of measurement used in all methods
-    '''    
+        '''
+        Constructor; allows setting up the page format, the orientation and the unit of measurement used in all methods
+        '''    
         super().__init__()
         self.WIDTH = 210
         self.HEIGHT = 297
         
     def lines(self):
-    '''
-    Method to add a border around the page by drawing a rectangle with coordinates specified
-    '''    
+        '''
+        Method to add a border around the page by drawing a rectangle with coordinates specified
+        '''    
         self.rect(5.0, 5.0, 200.0,287.0)
         
     def header(self):
-    '''
-    Method to render the page header. It is automatically called when a new page is added by method add_page()
-    '''
+        '''
+        Method to render the page header. It is automatically called when a new page is added by method add_page()
+        '''
         #set font, font formatting and size
         self.set_font('Arial', 'B', 11)
         #add header text, aligned to right
@@ -47,9 +47,9 @@ class PDF(FPDF, HTMLMixin):
         self.ln(20)
         
     def footer(self):
-    '''
-    Method to render the page footer. It is automatically called when a new page is added by method add_page()
-    '''
+        '''
+        Method to render the page footer. It is automatically called when a new page is added by method add_page()
+        '''
         # Page numbers in the footer
         #set y position where footer is to be added
         self.set_y(-15)
@@ -60,9 +60,9 @@ class PDF(FPDF, HTMLMixin):
         self.cell(0, 10, 'Page ' + str(self.page_no()), 0, 0, 'C')
 
     def page_body(self):
-    '''
-    Method to render the page body. This is where the entire report is created
-    '''
+        '''
+        Method to render the page body. This is where the entire report is created
+        '''
         #page 1 : title page, includes general details about the repository
         self.add_page()
         self.lines()
@@ -452,15 +452,15 @@ class PDF(FPDF, HTMLMixin):
 
 
     def print_page(self):
-    '''
-    method to print the pages of report
-    '''
+        '''
+        method to print the pages of report
+        '''
         self.page_body()
 
     def driver(self,Reponame,Username,token):
-    '''
-    driver function to get data to generate report
-    '''
+        '''
+        driver function to get data to generate report
+        '''
         analyser = Analyser(Reponame,Username) 
         score = ActiveNess(Reponame,Username,token)
 
