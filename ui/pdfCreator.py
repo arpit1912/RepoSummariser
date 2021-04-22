@@ -274,9 +274,9 @@ class PDF(FPDF, HTMLMixin):
         
         #Plotting a chart comparing these parametera
         
-        self.image('images/samplechart.png', 12.0, self.get_y() + 10.0, self.WIDTH - 20)
+        self.image('images/samplechart.png', 12.0, self.get_y() + 10.0, self.WIDTH - 20, 110)
         
-        self.set_xy(10.0,270)
+        self.set_xy(10.0,265)
         self.set_font('Arial', 'I', 8)
         self.set_text_color(186, 80, 100)
         self.multi_cell(w=0.0, h=8.0, align='L', txt= "*Minimal average corresponds to (mean - std dev) while maximal average corresponds to (mean + std dev). 68% of contributors lie within this range", border="")
