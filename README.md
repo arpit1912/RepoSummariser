@@ -1,6 +1,9 @@
 # RepoSummariser
 A tool that analyses the open source contributions across GitHub of all contributors to a given project and compares that to your own activity acroos GitHub. A pdf report is generated of the same, which can help users find out how compatible they are with a given project on Github.
 
+![image](https://user-images.githubusercontent.com/54976429/116203647-89289c00-a759-11eb-89ce-581a57a9b78c.png)
+
+
 ## Python Libraries
 < Add Pyhton libraries>
 
