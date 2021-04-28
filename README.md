@@ -5,7 +5,7 @@ A tool that analyses the open source contributions across GitHub of all contribu
 
 
 ## Python Libraries
-< Add Pyhton libraries>
+fpdf, json, numpy, matplotlib, pprint, statistics, datetime, os, random, github, requests, mimetypes.
 
 ## Instructions to run the tool
 1. Download/clone the repository
